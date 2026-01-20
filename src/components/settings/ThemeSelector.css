@@ -1,0 +1,51 @@
+.theme-selector {
+  padding: 12px 0;
+}
+
+.theme-title {
+  font-size: 14px;
+  margin-bottom: 10px;
+  opacity: 0.8;
+}
+
+.theme-options {
+  display: flex;
+  gap: 10px;
+}
+
+.theme-option {
+  cursor: pointer;
+}
+
+.theme-option input {
+  display: none;
+}
+
+.theme-card {
+  min-width: 80px;
+  padding: 12px;
+  border-radius: 12px;
+  background: var(--card);
+  border: 2px solid transparent;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.theme-icon {
+  font-size: 20px;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.theme-label {
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+.theme-option:hover .theme-card {
+  transform: translateY(-2px);
+}
+
+.theme-option.active .theme-card {
+  border-color: var(--primary);
+}
