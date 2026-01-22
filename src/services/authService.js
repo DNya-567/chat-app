@@ -1,11 +1,8 @@
-// src/services/authService.js
-const API_URL = "http://localhost:5000/api/auth";
+import API_BASE_URL from "./api";
 
-/* -------------------------------------------------
-   REGISTER USER
-   ------------------------------------------------- */
+/* REGISTER */
 export const registerUser = async (username, email, password) => {
-  const res = await fetch(`${API_URL}/register`, {
+  const res = await fetch(`${API_BASE_URL}/api/auth/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username, email, password }),
@@ -15,14 +12,13 @@ export const registerUser = async (username, email, password) => {
     const err = await res.json();
     throw new Error(err.message || "Registration failed");
   }
-  return res.json(); // { message: "User registered successfully" }
+
+  return res.json();
 };
 
-/* -------------------------------------------------
-   LOGIN USER
-   ------------------------------------------------- */
+/* LOGIN */
 export const loginUser = async (email, password) => {
-  const res = await fetch(`${API_URL}/login`, {
+  const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password }),
@@ -32,5 +28,6 @@ export const loginUser = async (email, password) => {
     const err = await res.json();
     throw new Error(err.message || "Login failed");
   }
-  return res.json(); // { token, user }
+
+  return res.json();
 };

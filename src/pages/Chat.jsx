@@ -5,6 +5,9 @@ import ProfileCard from "../components/profile/ProfileCard";
 import SettingsModal from "../components/settings/SettingsModal";
 import "./Chat.css";
 
+const API_URL =
+  import.meta.env.VITE_API_URL || "http://localhost:5000";
+
 const log = (...args) => console.log("[Chat]", ...args);
 
 export default function Chat() {
@@ -79,7 +82,7 @@ export default function Chat() {
 
   /* -------------------- LOAD CHATS -------------------- */
   useEffect(() => {
-    fetch(`http://localhost:5000/api/chats/my/${user._id}`)
+    fetch(`${API_URL}/api/chats/my/${user._id}`)
       .then((r) => r.json())
       .then(setChats)
       .catch(console.error);
@@ -135,7 +138,7 @@ export default function Chat() {
 
     try {
       const userRes = await fetch(
-        `http://localhost:5000/api/users/${searchId}`
+        `${API_URL}/api/users/${searchId}`
       );
 
       if (!userRes.ok) {
@@ -146,7 +149,7 @@ export default function Chat() {
       const otherUser = await userRes.json();
 
       const chatRes = await fetch(
-        "http://localhost:5000/api/chats/create",
+        `${API_URL}/api/chats/create`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

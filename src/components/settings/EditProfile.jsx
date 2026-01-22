@@ -1,13 +1,16 @@
 import { useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 
+const API_URL =
+  import.meta.env.VITE_API_URL || "http://localhost:5000";
+
 export default function EditProfile({ user, onBack }) {
   const [username, setUsername] = useState(user?.username || "");
   const [avatarPreview, setAvatarPreview] = useState(user?.avatar || "");
   const [avatarFile, setAvatarFile] = useState(null);
   const [saving, setSaving] = useState(false);
 
-  const { updateUser, token } = useAuth(); // ✅ token REQUIRED
+  const { updateUser, token } = useAuth();
 
   /* -------------------- Avatar Change -------------------- */
   const handleAvatarChange = (e) => {
@@ -37,11 +40,11 @@ export default function EditProfile({ user, onBack }) {
 
     try {
       const res = await fetch(
-        "http://localhost:5000/api/users/update-profile",
+        `${API_URL}/api/users/update-profile`,
         {
           method: "POST",
           headers: {
-            Authorization: `Bearer ${token}`, // 🔥 FIX
+            Authorization: `Bearer ${token}`,
           },
           body: formData,
         }
@@ -54,7 +57,7 @@ export default function EditProfile({ user, onBack }) {
 
       const data = await res.json();
 
-      // 🔥 INSTANT UI UPDATE
+      // 🔥 Instant global UI update
       updateUser(data.user);
 
       alert("Profile updated successfully");
