@@ -1,4 +1,3 @@
-// chat-server/routes/chat.js
 const router = require("express").Router();
 const mongoose = require("mongoose");
 const Chat = require("../models/Chat");
@@ -8,7 +7,6 @@ router.post("/create", async (req, res) => {
   try {
     const { userId, otherUserId } = req.body;
 
-    // 🔒 Validate IDs
     if (
       !mongoose.Types.ObjectId.isValid(userId) ||
       !mongoose.Types.ObjectId.isValid(otherUserId)
@@ -16,21 +14,21 @@ router.post("/create", async (req, res) => {
       return res.status(400).json({ message: "Invalid user IDs" });
     }
 
-    // ✅ Keep participants sorted to avoid duplicate chats
     const participants = [userId, otherUserId].map(String).sort();
 
     let chat = await Chat.findOne({ participants });
 
-    // ➕ Create if not exists
     if (!chat) {
       chat = await Chat.create({ participants });
     }
 
-    // 🔥 IMPORTANT: populate before returning
     const populatedChat = await Chat.findById(chat._id).populate(
       "participants",
       "_id username avatar email"
     );
+
+    /* 🔥 EMIT NEW CHAT TO OTHER USER */
+    req.io.to(otherUserId.toString()).emit("new_chat", populatedChat);
 
     return res.json(populatedChat);
   } catch (err) {
@@ -38,6 +36,7 @@ router.post("/create", async (req, res) => {
     return res.status(500).json({ message: "Failed to create chat" });
   }
 });
+
 
 /* -------------------- GET MY CHATS -------------------- */
 router.get("/my/:userId", async (req, res) => {

@@ -5,10 +5,7 @@ import ProfileCard from "../components/profile/ProfileCard";
 import SettingsModal from "../components/settings/SettingsModal";
 import "./Chat.css";
 
-const API_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:5000";
-
-const log = (...args) => console.log("[Chat]", ...args);
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 export default function Chat() {
   const { user, logout, loading } = useAuth();
@@ -34,21 +31,14 @@ export default function Chat() {
 
   /* -------------------- SOCKET INIT -------------------- */
   useEffect(() => {
-    const interval = setInterval(() => {
-      const sock = getSocket();
-      if (sock) {
-        socketRef.current = sock;
+    const sock = getSocket();
+    if (!sock) return;
 
-        whenConnected(sock).then(() => {
-          log("📡 socket connected:", sock.id);
-          setSocketReady(true);
-        });
+    socketRef.current = sock;
 
-        clearInterval(interval);
-      }
-    }, 50);
-
-    return () => clearInterval(interval);
+    whenConnected(sock).then(() => {
+      setSocketReady(true);
+    });
   }, []);
 
   /* -------------------- SOCKET LISTENERS -------------------- */
@@ -57,28 +47,59 @@ export default function Chat() {
     const sock = socketRef.current;
     if (!sock) return;
 
-    const onChatMessages = (msgs) => {
-      setMessages(msgs);
-    };
+    const onChatMessages = (msgs) => setMessages(msgs);
 
     const onReceiveMessage = (msg) => {
-      const senderId =
-        typeof msg.sender === "object" ? msg.sender._id : msg.sender;
+      setMessages((prev) => {
+        if (prev.some((m) => m._id === msg._id)) return prev;
 
-      // ignore optimistic echo
-      if (senderId === user._id) return;
+        const index = prev.findIndex(
+          (m) =>
+            m._id.startsWith("tmp-") &&
+            getSenderId(m) === getSenderId(msg)
+        );
 
-      setMessages((prev) => [...prev, msg]);
+        if (index === -1) return [...prev, msg];
+
+        const copy = [...prev];
+        copy[index] = msg;
+        return copy;
+      });
+    };
+
+    const onMessageUpdated = (updatedMsg) => {
+      setMessages((prev) => {
+        const index = prev.findIndex((m) => m._id === updatedMsg._id);
+        if (index === -1) return prev;
+
+        const copy = [...prev];
+        copy[index] = {
+          ...updatedMsg,
+          reactions: updatedMsg.reactions || [],
+        };
+        return copy;
+      });
+    };
+
+    const onNewChat = (chat) => {
+      setChats((prev) => {
+        if (prev.some((c) => c._id === chat._id)) return prev;
+        return [chat, ...prev];
+      });
     };
 
     sock.on("chat_messages", onChatMessages);
     sock.on("receive_message", onReceiveMessage);
+    sock.on("message_updated", onMessageUpdated);
+    sock.on("new_chat", onNewChat);
 
     return () => {
       sock.off("chat_messages", onChatMessages);
       sock.off("receive_message", onReceiveMessage);
+      sock.off("message_updated", onMessageUpdated);
+      sock.off("new_chat", onNewChat);
     };
-  }, [socketReady, user._id]);
+  }, [socketReady]);
 
   /* -------------------- LOAD CHATS -------------------- */
   useEffect(() => {
@@ -108,8 +129,44 @@ export default function Chat() {
     sock.emit("load_messages", { chatId: chat._id });
   };
 
+  /* -------------------- START CHAT BY ID (SEARCH) -------------------- */
+  const startChatById = async () => {
+    setSearchError("");
+    if (!searchId.trim()) return;
+
+    try {
+      const userRes = await fetch(`${API_URL}/api/users/${searchId}`);
+      if (!userRes.ok) {
+        setSearchError("User not found");
+        return;
+      }
+
+      const otherUser = await userRes.json();
+
+      const chatRes = await fetch(`${API_URL}/api/chats/create`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: user._id,
+          otherUserId: otherUser._id,
+        }),
+      });
+
+      const chat = await chatRes.json();
+
+      setChats((prev) =>
+        prev.some((c) => c._id === chat._id) ? prev : [chat, ...prev]
+      );
+
+      openChat(chat);
+      setSearchId("");
+    } catch {
+      setSearchError("Invalid user ID");
+    }
+  };
+
   /* -------------------- SEND MESSAGE -------------------- */
-  const sendMessage = async () => {
+  const sendMessage = () => {
     if (!message.trim() || !activeChat || !socketReady) return;
 
     const sock = socketRef.current;
@@ -123,59 +180,42 @@ export default function Chat() {
 
     sock.emit("send_message", payload);
 
-    // optimistic UI
     setMessages((prev) => [
       ...prev,
-      { ...payload, sender: user._id, _id: `tmp-${Date.now()}` },
+      {
+        _id: `tmp-${Date.now()}`,
+        chatId: payload.chatId,
+        sender: user._id,
+        text: payload.text,
+        createdAt: new Date().toISOString(),
+        reactions: [],
+        deleted: false,
+      },
     ]);
 
     setMessage("");
   };
 
-  /* -------------------- START CHAT BY ID -------------------- */
-  const startChatById = async () => {
-    setSearchError("");
+  /* -------------------- REACT MESSAGE -------------------- */
+  const reactToMessage = (messageId, emoji) => {
+    if (messageId.startsWith("tmp-")) return;
 
-    try {
-      const userRes = await fetch(
-        `${API_URL}/api/users/${searchId}`
-      );
-
-      if (!userRes.ok) {
-        setSearchError("User not found");
-        return;
-      }
-
-      const otherUser = await userRes.json();
-
-      const chatRes = await fetch(
-        `${API_URL}/api/chats/create`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            userId: user._id,
-            otherUserId: otherUser._id,
-          }),
-        }
-      );
-
-      const chat = await chatRes.json();
-
-      setChats((prev) =>
-        prev.some((c) => c._id === chat._id) ? prev : [chat, ...prev]
-      );
-
-      openChat(chat);
-    } catch {
-      setSearchError("Invalid user ID");
-    }
+    socketRef.current?.emit("react_message", {
+      messageId,
+      emoji,
+      userId: user._id,
+    });
   };
 
-  /* -------------------- AUTO SCROLL -------------------- */
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  /* -------------------- DELETE MESSAGE -------------------- */
+  const deleteMessage = (messageId) => {
+    if (messageId.startsWith("tmp-")) return;
+
+    socketRef.current?.emit("delete_message", {
+      messageId,
+      userId: user._id,
+    });
+  };
 
   /* -------------------- HELPERS -------------------- */
   const getOtherUser = (chat) =>
@@ -183,6 +223,17 @@ export default function Chat() {
 
   const getSenderId = (msg) =>
     typeof msg.sender === "object" ? msg.sender._id : msg.sender;
+
+  const formatTime = (date) =>
+    new Date(date).toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+  /* -------------------- AUTO SCROLL -------------------- */
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   /* -------------------- UI -------------------- */
   return (
@@ -205,17 +256,33 @@ export default function Chat() {
         {searchError && <div className="error">{searchError}</div>}
 
         <div className="chat-list">
-          {chats.map((chat) => (
-            <div
-              key={chat._id}
-              onClick={() => openChat(chat)}
-              className={`chat-item ${
-                activeChat?._id === chat._id ? "active" : ""
-              }`}
-            >
-              {getOtherUser(chat)?.username || "Unknown"}
-            </div>
-          ))}
+          {chats.map((chat) => {
+            const other = getOtherUser(chat);
+            return (
+              <div
+                key={chat._id}
+                onClick={() => openChat(chat)}
+                className={`chat-item ${
+                  activeChat?._id === chat._id ? "active" : ""
+                }`}
+              >
+                <img
+                  src={
+                    other?.avatar
+                      ? other.avatar.startsWith("http")
+                        ? other.avatar
+                        : `${API_URL}${other.avatar}`
+                      : "/default-avatar.png"
+                  }
+                  className="chat-avatar"
+                  alt="avatar"
+                />
+                <span className="chat-username">
+                  {other?.username || "Unknown"}
+                </span>
+              </div>
+            );
+          })}
         </div>
 
         <button
@@ -233,9 +300,7 @@ export default function Chat() {
       {/* MAIN CHAT */}
       <div className="chat-main">
         {!activeChat ? (
-          <div className="chat-messages flex-center">
-            Select a chat
-          </div>
+          <div className="chat-messages flex-center">Select a chat</div>
         ) : (
           <>
             <div className="chat-header">
@@ -243,20 +308,52 @@ export default function Chat() {
             </div>
 
             <div className="chat-messages">
-              {messages.map((msg, i) => {
+              {messages.map((msg) => {
                 const mine = getSenderId(msg) === user._id;
 
                 return (
                   <div
-                    key={i}
+                    key={msg._id}
                     className={`message-row ${mine ? "mine" : ""}`}
                   >
-                    <div
-                      className={`message-bubble ${
-                        mine ? "mine" : "other"
-                      } animate-msg`}
-                    >
-                      {msg.text}
+                    <div className={`message-bubble ${mine ? "mine" : "other"}`}>
+                      <div className="message-text">
+                        {msg.deleted ? <i>{msg.text}</i> : msg.text}
+                      </div>
+
+                      <div className="message-time">
+                        {formatTime(msg.createdAt)}
+                      </div>
+
+                      {msg.reactions?.length > 0 && (
+                        <div className="reactions">
+                          {msg.reactions.map((r, i) => (
+                            <span key={`${r.userId}-${i}`}>{r.emoji}</span>
+                          ))}
+                        </div>
+                      )}
+
+                      {!msg.deleted && (
+                        <div className="message-actions">
+                          {["👍", "❤️", "😂", "😢"].map((e) => (
+                            <span
+                              key={e}
+                              onClick={() => reactToMessage(msg._id, e)}
+                            >
+                              {e}
+                            </span>
+                          ))}
+
+                          {mine && (
+                            <span
+                              className="delete-btn"
+                              onClick={() => deleteMessage(msg._id)}
+                            >
+                              🗑️
+                            </span>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
                 );
@@ -272,10 +369,7 @@ export default function Chat() {
                 onKeyDown={(e) => e.key === "Enter" && sendMessage()}
                 placeholder="Type a message..."
               />
-              <button
-                className="chat-send-btn"
-                onClick={sendMessage}
-              >
+              <button className="chat-send-btn" onClick={sendMessage}>
                 Send
               </button>
             </div>
@@ -283,7 +377,6 @@ export default function Chat() {
         )}
       </div>
 
-      {/* SETTINGS MODAL */}
       {showSettings && (
         <SettingsModal onClose={() => setShowSettings(false)} />
       )}
