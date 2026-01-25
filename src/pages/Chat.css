@@ -1,17 +1,28 @@
 :root {
-  --bg-main: #0e0e10;
-  --bg-sidebar: #141417;
-  --bg-surface: #0f172a;
-  --bg-input: #1f2933;
+  /* ===== Background layers ===== */
+  --bg-main: #0b0f1a;        /* app background */
+  --bg-sidebar: #0f1524;    /* left sidebar */
+  --bg-surface: #111827;    /* headers, modals */
+  --bg-card: #161e2e;       /* message bubbles, cards */
+  --bg-input: #1b2436;      /* inputs */
 
-  --text-primary: #e5e7eb;
-  --text-muted: #9ca3af;
+  /* ===== Text ===== */
+  --text-primary: #e6e9f0;  /* main text */
+  --text-muted: #9aa3b2;    /* secondary text */
 
-  --border: #1f2933;
-  --hover: #1f2933;
+  /* ===== Borders & hover ===== */
+  --border: rgba(255,255,255,0.06);
+  --hover: rgba(255,255,255,0.05);
 
-  --accent: #4f46e5;
+  /* ===== Accent (Linear-like indigo) ===== */
+  --accent: #6366f1;
+  --accent-soft: #818cf8;
 }
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
 
 /* ====== Layout ====== */
 .chat-container {
@@ -113,16 +124,22 @@
 }
 
 .message-bubble {
-  max-width: 70%;
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border-radius: 14px;
   padding: 10px 14px;
-  border-radius: 16px;
-  font-size: 14px;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.25);
 }
 
 .message-bubble.mine {
-  background: var(--accent);
-  color: white;
+  background: linear-gradient(
+    135deg,
+    var(--accent),
+    var(--accent-soft)
+  );
+  color: #fff;
 }
+
 
 .message-bubble.other {
   background: var(--bg-input);
@@ -161,7 +178,7 @@
 .settings-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.55);
+  background: rgba(79, 78, 78, 0.55);
   backdrop-filter: blur(6px);
   display: flex;
   align-items: center;
@@ -313,3 +330,78 @@
     transform: translateY(0);
   }
 }
+.message-bubble {
+  position: relative;
+}
+
+.message-time {
+  font-size: 11px;
+  color: #9ca3af;   /* visible gray */
+  text-align: right;
+  margin-top: 4px;
+}
+
+.message-actions {
+  display: none;
+  gap: 6px;
+  margin-top: 4px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.message-bubble:hover .message-actions {
+  display: flex;
+}
+
+.reactions {
+  margin-top: 4px;
+  font-size: 16px;
+}
+
+.delete-btn {
+  margin-left: 6px;
+  color: red;
+}
+
+.message-text i {
+  opacity: 0.6;
+}
+
+.chat-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  cursor: pointer;
+}
+
+.chat-item.active {
+  background: #594444;
+}
+
+.chat-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.chat-username {
+  font-weight: 500;
+}
+
+.message-bubble {
+  background: var(--bg-card);
+  border-radius: 14px;
+  padding: 10px 14px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+}
+
+.message-bubble.mine {
+  background: linear-gradient(
+    135deg,
+    var(--accent),
+    var(--accent-soft)
+  );
+}
+

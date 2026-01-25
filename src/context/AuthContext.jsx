@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { initSocket, whenConnected, destroySocket } from "../services/socket";
+import { initSocket, destroySocket } from "../services/socket";
 import { normaliseUser } from "../services/normaliseUser";
 
 const AuthContext = createContext();
@@ -22,35 +22,33 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  /* ---------- Create & connect socket ---------- */
+  /* ---------- Init socket (NON-BLOCKING) ---------- */
   useEffect(() => {
     if (!user?._id || !token) return;
 
     const sock = initSocket(token);
     sock.connect();
 
-    whenConnected(sock).then(() => {
-      console.log("[Auth] 📤 join_user_chats →", user._id);
-      sock.emit("join_user_chats", { userId: user._id });
-    });
+    // ❌ NO join_user_chats here
+    // ❌ NO whenConnected
+    // ❌ NO destroySocket cleanup
 
-    return () => {
-      destroySocket();
-    };
   }, [user?._id, token]);
 
   /* ---------- Login ---------- */
-  const login = (loginResponse) => {
-    const norm = normaliseUser(loginResponse.user);
+  const login = ({ user, token }) => {
+    const norm = normaliseUser(user);
+
     setUser(norm);
-    setToken(loginResponse.token);
+    setToken(token);
+
     sessionStorage.setItem(
       "auth",
-      JSON.stringify({ user: norm, token: loginResponse.token })
+      JSON.stringify({ user: norm, token })
     );
   };
 
-  /* ---------- 🔥 UPDATE USER (NEW) ---------- */
+  /* ---------- Update user ---------- */
   const updateUser = (updatedUser) => {
     setUser((prev) => {
       const merged = { ...prev, ...normaliseUser(updatedUser) };
@@ -82,7 +80,7 @@ export const AuthProvider = ({ children }) => {
         isAuthenticated: !!user && !!token,
         login,
         logout,
-        updateUser, // ✅ exposed
+        updateUser,
       }}
     >
       {children}

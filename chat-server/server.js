@@ -1,4 +1,3 @@
-// server/server.js
 require("dotenv").config();
 
 /* -------------------- ENV CHECK -------------------- */
@@ -28,9 +27,7 @@ const userRoutes = require("./routes/users");
 const app = express();
 
 app.use(cors());
-app.use(express.json()); // JSON only (multer handles multipart)
-
-/* ✅ IMPORTANT: serve uploaded avatars */
+app.use(express.json());
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 /* -------------------- API ROUTES -------------------- */
@@ -52,48 +49,116 @@ const io = new Server(server, {
   },
 });
 
-/* -------------------- SOCKET LOGIC -------------------- */
+/* ==================== SOCKET LOGIC ==================== */
 io.on("connection", (socket) => {
-  console.log("[server] ✅ Socket connected:", socket.id);
+  console.log("\n[SOCKET] 🔌 Connected:", socket.id);
 
+  /* ---------- JOIN USER ROOMS ---------- */
   socket.on("join_user_chats", async ({ userId }) => {
-    if (!mongoose.Types.ObjectId.isValid(userId)) {
-      console.warn("[server] ⚠️ invalid userId:", userId);
-      return;
-    }
+    console.log("[SOCKET] join_user_chats →", userId);
+
+    if (!mongoose.Types.ObjectId.isValid(userId)) return;
+
+    socket.join(userId.toString());
 
     const chats = await Chat.find({ participants: userId }).select("_id");
-    chats.forEach((c) => socket.join(String(c._id)));
+    chats.forEach((c) => socket.join(c._id.toString()));
   });
 
+  /* ---------- JOIN SINGLE CHAT ---------- */
   socket.on("join_chat", ({ chatId }) => {
-    socket.join(String(chatId));
+    console.log("[SOCKET] join_chat →", chatId);
+    socket.join(chatId.toString());
   });
 
+  /* ---------- LOAD MESSAGES ---------- */
   socket.on("load_messages", async ({ chatId }) => {
+    console.log("[SOCKET] load_messages →", chatId);
+
     const msgs = await Message.find({ chatId })
       .sort({ createdAt: 1 })
-      .populate("sender", "username _id");
+      .populate("sender", "_id username");
 
     socket.emit("chat_messages", msgs);
   });
 
+  /* ---------- SEND MESSAGE ---------- */
   socket.on("send_message", async ({ chatId, senderId, text }) => {
-    if (!chatId || !senderId || !text?.trim()) return;
+    console.log("[SOCKET] send_message:", { chatId, senderId, text });
 
     const message = await Message.create({
       chatId,
       sender: senderId,
-      text: text.trim(),
+      text,
     });
 
-    io.to(String(chatId)).emit("receive_message", message);
+    const populated = await Message.findById(message._id).populate(
+      "sender",
+      "_id username"
+    );
+
+    io.to(chatId.toString()).emit("receive_message", populated);
+  });
+
+  /* ---------- 🔥 EMOJI REACTION ---------- */
+  socket.on("react_message", async ({ messageId, emoji, userId }) => {
+    console.log("➡️ react_message received", { messageId, emoji, userId });
+
+    const message = await Message.findById(messageId);
+    console.log("📄 BEFORE SAVE:", message);
+
+    if (!message) {
+      console.log("❌ Message not found");
+      return;
+    }
+
+    message.reactions = message.reactions.filter(
+      (r) => r.userId.toString() !== userId
+    );
+
+    message.reactions.push({ emoji, userId });
+
+    await message.save();
+
+    const verify = await Message.findById(messageId);
+    console.log("✅ AFTER SAVE:", verify.reactions);
+
+    const updated = await Message.findById(messageId).populate(
+      "sender",
+      "_id username"
+    );
+
+    io.to(message.chatId.toString()).emit("message_updated", updated);
+  });
+
+  /* ---------- 🔥 DELETE MESSAGE ---------- */
+  socket.on("delete_message", async ({ messageId, userId }) => {
+    console.log("🗑️ delete_message", { messageId, userId });
+
+    const message = await Message.findById(messageId);
+    if (!message) return;
+
+    if (message.sender.toString() !== userId) return;
+
+    message.deleted = true;
+    message.text = "This message was deleted";
+    message.reactions = [];
+
+    await message.save();
+
+    const updated = await Message.findById(messageId).populate(
+      "sender",
+      "_id username"
+    );
+
+    io.to(message.chatId.toString()).emit("message_updated", updated);
   });
 
   socket.on("disconnect", () => {
-    console.log("[server] ❌ Socket disconnected:", socket.id);
+    console.log("[SOCKET] ❌ Disconnected:", socket.id);
   });
 });
+
 
 /* -------------------- START SERVER -------------------- */
 const PORT = process.env.PORT || 5000;

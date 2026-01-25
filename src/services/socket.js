@@ -1,8 +1,6 @@
-// src/services/socket.js
 import { io } from "socket.io-client";
 
-const SOCKET_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:5000";
+const SOCKET_URL = "http://localhost:5000";
 
 let socket = null;
 
@@ -15,17 +13,13 @@ export const initSocket = (token) => {
     auth: { token },
   });
 
-  socket.on("connect", () => {
-    console.log("[socket] ✅ connected:", socket.id);
-  });
+  socket.on("connect", () =>
+    console.log("[socket] connected:", socket.id)
+  );
 
-  socket.on("disconnect", (reason) => {
-    console.log("[socket] ❌ disconnected:", reason);
-  });
-
-  socket.on("connect_error", (err) => {
-    console.error("[socket] ❌ connect_error:", err.message);
-  });
+  socket.on("disconnect", (r) =>
+    console.log("[socket] disconnected:", r)
+  );
 
   return socket;
 };

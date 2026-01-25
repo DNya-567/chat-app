@@ -25,7 +25,11 @@
   min-width: 80px;
   padding: 12px;
   border-radius: 12px;
-  background: var(--card);
+
+  /* ✅ fallback colors */
+  background: var(--card, #1e1e1e);
+  color: var(--text, #ffffff);
+
   border: 2px solid transparent;
   text-align: center;
   transition: all 0.2s ease;
@@ -47,5 +51,17 @@
 }
 
 .theme-option.active .theme-card {
-  border-color: var(--primary);
+  border-color: var(--primary, #00ffff);
+}
+
+[data-theme="neon"] {
+  --bg: #05050a;
+  --card: #0b0b18;
+  --text: #eaffff;
+  --muted: #8fffff;
+
+  --primary: #00ffff;
+  --secondary: #ff00ff;
+
+  --border: rgba(0, 255, 255, 0.3);
 }

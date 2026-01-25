@@ -28,33 +28,58 @@ const themes = {
   },
 
   amoled: {
-  "--bg-main": "#000000",        // true black
-  "--bg-sidebar": "#0a0a0a",     // slightly lifted
-  "--bg-surface": "#0f0f0f",     // cards / headers
-  "--bg-input": "#141414",       // inputs & bubbles
+    "--bg-main": "#000000",
+    "--bg-sidebar": "#0a0a0a",
+    "--bg-surface": "#0f0f0f",
+    "--bg-input": "#141414",
+    "--text-primary": "#ffffff",
+    "--text-muted": "#a1a1aa",
+    "--border": "#1a1a1a",
+    "--hover": "#1f1f1f",
+    "--accent": "#22ff88",
+  },
+  neon: {
+  /* Backgrounds */
+  "--bg-main": "#0b0f14",        // deep blue‑black
+  "--bg-sidebar": "#0f141b",    // slightly lifted
+  "--bg-surface": "#121926",    // cards / headers
+  "--bg-input": "#151d2e",      // inputs & bubbles
 
-  "--text-primary": "#ffffff",
-  "--text-muted": "#a1a1aa",
+  /* Text */
+  "--text-primary": "#e6edf6",  // soft white
+  "--text-muted": "#9aa4b2",    // calm gray‑blue
 
-  "--border": "#1a1a1a",
-  "--hover": "#1f1f1f",
+  /* Borders & hover */
+  "--border": "#1f2a3a",
+  "--hover": "#182235",
 
-  "--accent": "#22ff88",         // neon green accent
-},
+  /* Accent (soft cyan‑blue glow) */
+  "--accent": "#5ddcff",
+  
+}
+
 
 };
 
 export function ThemeProvider({ children }) {
-  const [theme, setTheme] = useState(
-    localStorage.getItem("theme") || "dark"
-  );
+  const [theme, setTheme] = useState(() => {
+    const saved = localStorage.getItem("theme");
+    return themes[saved] ? saved : "dark";
+  });
 
   useEffect(() => {
     const vars = themes[theme];
-    Object.keys(vars).forEach((key) => {
-      document.documentElement.style.setProperty(key, vars[key]);
+
+    if (!vars || typeof vars !== "object") {
+      console.error("❌ Invalid theme:", theme);
+      return;
+    }
+
+    Object.entries(vars).forEach(([key, value]) => {
+      document.documentElement.style.setProperty(key, value);
     });
 
+    document.documentElement.setAttribute("data-theme", theme);
     localStorage.setItem("theme", theme);
   }, [theme]);
 
