@@ -13,32 +13,34 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const stored = sessionStorage.getItem("auth");
     if (stored) {
-      const parsed = JSON.parse(stored);
-      if (parsed?.user && parsed?.token) {
-        setUser(normaliseUser(parsed.user));
-        setToken(parsed.token);
+      try {
+        const parsed = JSON.parse(stored);
+        if (parsed?.user && parsed?.token) {
+          setUser(normaliseUser(parsed.user));
+          setToken(parsed.token);
+        }
+      } catch {
+        sessionStorage.removeItem("auth");
       }
     }
     setLoading(false);
   }, []);
 
-  /* ---------- Init socket (NON-BLOCKING) ---------- */
+  /* ---------- Init socket (once per auth) ---------- */
   useEffect(() => {
     if (!user?._id || !token) return;
 
-    const sock = initSocket(token);
-    sock.connect();
+    const socket = initSocket(token);
+    socket.connect();
 
-    // ❌ NO join_user_chats here
-    // ❌ NO whenConnected
-    // ❌ NO destroySocket cleanup
-
+    return () => {
+      destroySocket();
+    };
   }, [user?._id, token]);
 
   /* ---------- Login ---------- */
   const login = ({ user, token }) => {
     const norm = normaliseUser(user);
-
     setUser(norm);
     setToken(token);
 

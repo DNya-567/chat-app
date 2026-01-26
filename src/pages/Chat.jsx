@@ -31,15 +31,20 @@ export default function Chat() {
 
   /* -------------------- SOCKET INIT -------------------- */
   useEffect(() => {
-    const sock = getSocket();
-    if (!sock) return;
+  const sock = getSocket();
 
-    socketRef.current = sock;
+  if (!sock) {
+    console.warn("❌ socket not initialized yet");
+    return;
+  }
 
-    whenConnected(sock).then(() => {
-      setSocketReady(true);
-    });
-  }, []);
+  socketRef.current = sock;
+
+  whenConnected(sock).then(() => {
+    setSocketReady(true);
+  });
+}, []);
+
 
   /* -------------------- SOCKET LISTENERS -------------------- */
   useEffect(() => {
@@ -107,12 +112,8 @@ export default function Chat() {
   }, [user._id]);
 
   /* -------------------- OPEN CHAT -------------------- */
-  const openChat = async (chat) => {
+ const openChat = async (chat) => {
   if (!chat?._id) return;
-
-  // 1️⃣ Open UI immediately
-  setActiveChat(chat);
-  setMessages([]);
 
   const sock = socketRef.current;
   if (!sock) {
@@ -120,17 +121,22 @@ export default function Chat() {
     return;
   }
 
-  // 2️⃣ Ensure socket is connected
-  await whenConnected(sock);
+  // 1️⃣ Set active chat (do NOT clear messages yet)
+  setActiveChat(chat);
 
-  // 3️⃣ Join chat room once
-  if (!joinedRooms.current.has(chat._id)) {
-    sock.emit("join_chat", { chatId: chat._id });
-    joinedRooms.current.add(chat._id);
+  // 2️⃣ Ensure socket is REALLY ready
+  if (!sock.connected) {
+    await whenConnected(sock);
   }
 
-  // 4️⃣ Load messages
+  // 3️⃣ ALWAYS re-join room (safe & cheap)
+  sock.emit("join_chat", { chatId: chat._id });
+
+  // 4️⃣ Request messages
   sock.emit("load_messages", { chatId: chat._id });
+
+  // 5️⃣ Clear messages only if switching chats
+  setMessages([]);
 };
 
 
