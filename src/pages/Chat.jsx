@@ -73,10 +73,7 @@ export default function Chat() {
         if (index === -1) return prev;
 
         const copy = [...prev];
-        copy[index] = {
-          ...updatedMsg,
-          reactions: updatedMsg.reactions || [],
-        };
+        copy[index] = updatedMsg;
         return copy;
       });
     };
@@ -129,7 +126,7 @@ export default function Chat() {
     sock.emit("load_messages", { chatId: chat._id });
   };
 
-  /* -------------------- START CHAT BY ID (SEARCH) -------------------- */
+  /* -------------------- SEARCH / START CHAT -------------------- */
   const startChatById = async () => {
     setSearchError("");
     if (!searchId.trim()) return;
@@ -196,10 +193,9 @@ export default function Chat() {
     setMessage("");
   };
 
-  /* -------------------- REACT MESSAGE -------------------- */
+  /* -------------------- MESSAGE ACTIONS -------------------- */
   const reactToMessage = (messageId, emoji) => {
     if (messageId.startsWith("tmp-")) return;
-
     socketRef.current?.emit("react_message", {
       messageId,
       emoji,
@@ -207,10 +203,8 @@ export default function Chat() {
     });
   };
 
-  /* -------------------- DELETE MESSAGE -------------------- */
   const deleteMessage = (messageId) => {
     if (messageId.startsWith("tmp-")) return;
-
     socketRef.current?.emit("delete_message", {
       messageId,
       userId: user._id,
@@ -238,7 +232,7 @@ export default function Chat() {
   /* -------------------- UI -------------------- */
   return (
     <div className="chat-container">
-      {/* LEFT SIDEBAR */}
+      {/* SIDEBAR */}
       <div className="chat-sidebar">
         <ProfileCard user={user} />
 
@@ -258,6 +252,12 @@ export default function Chat() {
         <div className="chat-list">
           {chats.map((chat) => {
             const other = getOtherUser(chat);
+            const avatar =
+              other?.avatar && other.avatar.startsWith("http")
+                ? other.avatar
+                : "https://ui-avatars.com/api/?name=" +
+                  encodeURIComponent(other?.username || "U");
+
             return (
               <div
                 key={chat._id}
@@ -266,17 +266,7 @@ export default function Chat() {
                   activeChat?._id === chat._id ? "active" : ""
                 }`}
               >
-                <img
-                  src={
-                    other?.avatar
-                      ? other.avatar.startsWith("http")
-                        ? other.avatar
-                        : `${API_URL}${other.avatar}`
-                      : "/default-avatar.png"
-                  }
-                  className="chat-avatar"
-                  alt="avatar"
-                />
+                <img src={avatar} className="chat-avatar" alt="avatar" />
                 <span className="chat-username">
                   {other?.username || "Unknown"}
                 </span>
@@ -343,7 +333,6 @@ export default function Chat() {
                               {e}
                             </span>
                           ))}
-
                           {mine && (
                             <span
                               className="delete-btn"
