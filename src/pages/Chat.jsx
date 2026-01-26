@@ -108,23 +108,31 @@ export default function Chat() {
 
   /* -------------------- OPEN CHAT -------------------- */
   const openChat = async (chat) => {
-    if (!chat?._id || !socketReady) return;
+  if (!chat?._id) return;
 
-    setActiveChat(chat);
-    setMessages([]);
+  // 1️⃣ Open UI immediately
+  setActiveChat(chat);
+  setMessages([]);
 
-    const sock = socketRef.current;
-    if (!sock) return;
+  const sock = socketRef.current;
+  if (!sock) {
+    console.warn("❌ socket not initialized");
+    return;
+  }
 
-    await whenConnected(sock);
+  // 2️⃣ Ensure socket is connected
+  await whenConnected(sock);
 
-    if (!joinedRooms.current.has(chat._id)) {
-      sock.emit("join_chat", { chatId: chat._id });
-      joinedRooms.current.add(chat._id);
-    }
+  // 3️⃣ Join chat room once
+  if (!joinedRooms.current.has(chat._id)) {
+    sock.emit("join_chat", { chatId: chat._id });
+    joinedRooms.current.add(chat._id);
+  }
 
-    sock.emit("load_messages", { chatId: chat._id });
-  };
+  // 4️⃣ Load messages
+  sock.emit("load_messages", { chatId: chat._id });
+};
+
 
   /* -------------------- SEARCH / START CHAT -------------------- */
   const startChatById = async () => {
