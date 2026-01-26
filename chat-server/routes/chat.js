@@ -14,6 +14,11 @@ router.post("/create", async (req, res) => {
       return res.status(400).json({ message: "Invalid user IDs" });
     }
 
+    if (userId === otherUserId) {
+      return res.status(400).json({ message: "Cannot chat with yourself" });
+    }
+
+    // Always store participants sorted
     const participants = [userId, otherUserId].map(String).sort();
 
     let chat = await Chat.findOne({ participants });
@@ -27,23 +32,19 @@ router.post("/create", async (req, res) => {
       "_id username avatar email"
     );
 
-    /* 🔥 EMIT NEW CHAT TO OTHER USER */
-    req.io.to(otherUserId.toString()).emit("new_chat", populatedChat);
-
-    return res.json(populatedChat);
+    // ✅ IMPORTANT: do NOT emit sockets from HTTP routes
+    return res.status(200).json(populatedChat);
   } catch (err) {
     console.error("[chat-create] error:", err);
     return res.status(500).json({ message: "Failed to create chat" });
   }
 });
 
-
 /* -------------------- GET MY CHATS -------------------- */
 router.get("/my/:userId", async (req, res) => {
   try {
     const { userId } = req.params;
 
-    // 🔒 Validate ID
     if (!mongoose.Types.ObjectId.isValid(userId)) {
       return res.status(400).json({ message: "Invalid user ID" });
     }
