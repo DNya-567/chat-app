@@ -1,23 +1,61 @@
 const router = require("express").Router();
 const mongoose = require("mongoose");
 const Chat = require("../models/Chat");
+const { validate, validateParams } = require("../middleware/validate");
+const { createChatSchema, getChatsByUserSchema } = require("../validations/chatValidation");
 
+/**
+ * @swagger
+ * /api/chat/create:
+ *   post:
+ *     summary: Create a new chat
+ *     description: Create a new 1-on-1 chat between two users or get existing chat
+ *     tags:
+ *       - Chat
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - userId
+ *               - otherUserId
+ *             properties:
+ *               userId:
+ *                 type: string
+ *                 example: 507f1f77bcf86cd799439011
+ *                 description: Current user ID (MongoDB ObjectId)
+ *               otherUserId:
+ *                 type: string
+ *                 example: 507f1f77bcf86cd799439012
+ *                 description: Other user ID (must be different from userId)
+ *     responses:
+ *       200:
+ *         description: Chat created or retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Chat'
+ *       400:
+ *         description: Validation error (invalid IDs or same user)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ValidationError'
+ *       500:
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
 /* -------------------- CREATE CHAT -------------------- */
-router.post("/create", async (req, res) => {
+router.post("/create", validate(createChatSchema), async (req, res) => {
   try {
     const { userId, otherUserId } = req.body;
 
-    if (
-      !mongoose.Types.ObjectId.isValid(userId) ||
-      !mongoose.Types.ObjectId.isValid(otherUserId)
-    ) {
-      return res.status(400).json({ message: "Invalid user IDs" });
-    }
-
-    if (userId === otherUserId) {
-      return res.status(400).json({ message: "Cannot chat with yourself" });
-    }
-
+    // ✅ Input already validated by middleware
     // Always store participants sorted
     const participants = [userId, otherUserId].map(String).sort();
 
@@ -40,15 +78,50 @@ router.post("/create", async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /api/chat/my/{userId}:
+ *   get:
+ *     summary: Get all chats for a user
+ *     description: Retrieve all chats the user is a participant in, sorted by most recent
+ *     tags:
+ *       - Chat
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         example: 507f1f77bcf86cd799439011
+ *         description: User ID (MongoDB ObjectId)
+ *     responses:
+ *       200:
+ *         description: List of chats retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Chat'
+ *       400:
+ *         description: Validation error (invalid user ID)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ValidationError'
+ *       500:
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
 /* -------------------- GET MY CHATS -------------------- */
-router.get("/my/:userId", async (req, res) => {
+router.get("/my/:userId", validateParams(getChatsByUserSchema), async (req, res) => {
   try {
     const { userId } = req.params;
 
-    if (!mongoose.Types.ObjectId.isValid(userId)) {
-      return res.status(400).json({ message: "Invalid user ID" });
-    }
-
+    // ✅ Input already validated by middleware
     const chats = await Chat.find({ participants: userId })
       .populate("participants", "_id username avatar email")
       .sort({ updatedAt: -1 });

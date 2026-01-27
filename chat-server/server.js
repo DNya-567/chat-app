@@ -13,9 +13,11 @@ const { Server } = require("socket.io");
 const cors = require("cors");
 const mongoose = require("mongoose");
 const path = require("path");
+const swaggerUi = require("swagger-ui-express");
 
 /* -------------------- LOCAL MODULES -------------------- */
 const connectDB = require("./db");
+const swaggerSpecs = require("./config/swagger");
 const Message = require("./models/Message");
 const Chat = require("./models/Chat");
 
@@ -25,18 +27,26 @@ const userRoutes = require("./routes/users");
 
 /* -------------------- EXPRESS APP -------------------- */
 const app = express();
+
+// Allow multiple origins for development and production
 const allowedOrigins = [
-  "http://localhost:5173",
+  "http://localhost:5173",      // Vite default dev port
+  "http://localhost:5174",      // Alternative dev port
+  "http://localhost:3000",      // Alternative dev port
+  "http://localhost:3001",      // Alternative dev port
+  "http://127.0.0.1:5173",      // Localhost alias
+  "http://127.0.0.1:5174",      // Localhost alias
 ];
 
 app.use(cors({
   origin: function (origin, callback) {
     if (!origin) return callback(null, true);
 
-    // ✅ Allow ALL Vercel preview deployments
+    // Allow all Vercel deployments and allowed origins
     if (
-      origin === "http://localhost:5173" ||
-      origin.endsWith(".vercel.app")
+      allowedOrigins.includes(origin) ||
+      origin.endsWith(".vercel.app") ||
+      origin.endsWith(".onrender.com")
     ) {
       return callback(null, true);
     }
@@ -46,13 +56,15 @@ app.use(cors({
   },
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
 }));
-
-
-
 
 app.use(express.json());
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+/* -------------------- SWAGGER UI -------------------- */
+app.use("/api-docs", swaggerUi.serve);
+app.get("/api-docs", swaggerUi.setup(swaggerSpecs, { explorer: true }));
 
 /* -------------------- API ROUTES -------------------- */
 app.use("/api/auth", authRoutes);
@@ -70,12 +82,16 @@ const io = new Server(server, {
   cors: {
     origin: (origin, callback) => {
       if (!origin) return callback(null, true);
+
+      // Allow same origins as Express CORS
       if (
-        origin === "http://localhost:5173" ||
-        origin.endsWith(".vercel.app")
+        allowedOrigins.includes(origin) ||
+        origin.endsWith(".vercel.app") ||
+        origin.endsWith(".onrender.com")
       ) {
         return callback(null, true);
       }
+
       callback(new Error("Not allowed by CORS"));
     },
     credentials: true,
@@ -197,6 +213,26 @@ io.on("connection", (socket) => {
 
 /* -------------------- START SERVER -------------------- */
 const PORT = process.env.PORT || 5000;
+
 server.listen(PORT, () => {
   console.log(`[server] 🚀 Server listening on http://localhost:${PORT}`);
 });
+
+// Handle port already in use error
+server.on("error", (err) => {
+  if (err.code === "EADDRINUSE") {
+    console.error(`\n❌ Port ${PORT} is already in use!`);
+    console.error(`\n🔧 Solutions:\n`);
+    console.error(`1. Kill the process using port ${PORT}:`);
+    console.error(`   PowerShell (Admin):`);
+    console.error(`   netstat -ano | findstr :${PORT}`);
+    console.error(`   taskkill /PID <pid> /F\n`);
+    console.error(`2. Or use a different port:`);
+    console.error(`   set PORT=5001 && npm run dev\n`);
+    console.error(`3. Or restart your computer\n`);
+    process.exit(1);
+  } else {
+    throw err;
+  }
+});
+
