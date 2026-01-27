@@ -8,7 +8,8 @@ import "./Chat.css";
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 export default function Chat() {
-  const { user, logout, loading } = useAuth();
+  const { user, logout, loading, socketReady } = useAuth();
+
 
   const [chats, setChats] = useState([]);
   const [activeChat, setActiveChat] = useState(null);
@@ -18,32 +19,34 @@ export default function Chat() {
   const [searchId, setSearchId] = useState("");
   const [searchError, setSearchError] = useState("");
 
-  const [socketReady, setSocketReady] = useState(false);
+  //const [socketReady, setSocketReady] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
 
   const socketRef = useRef(null);
   const messagesEndRef = useRef(null);
   const joinedRooms = useRef(new Set());
 
+  
+
   /* -------------------- SAFETY -------------------- */
   if (loading) return <div className="flex-center">Loading…</div>;
   if (!user?._id) return <div className="flex-center">Loading user…</div>;
 
   /* -------------------- SOCKET INIT -------------------- */
-  useEffect(() => {
-  const sock = getSocket();
+ useEffect(() => {
+  if (!socketReady) return;
 
+  const sock = getSocket();
   if (!sock) {
-    console.warn("❌ socket not initialized yet");
+    console.error("❌ Chat.jsx: socket still missing");
     return;
   }
 
   socketRef.current = sock;
+  console.log("✅ Chat.jsx socket available");
+}, [socketReady]);
 
-  whenConnected(sock).then(() => {
-    setSocketReady(true);
-  });
-}, []);
+
 
 
   /* -------------------- SOCKET LISTENERS -------------------- */
@@ -112,32 +115,39 @@ export default function Chat() {
   }, [user._id]);
 
   /* -------------------- OPEN CHAT -------------------- */
- const openChat = async (chat) => {
-  if (!chat?._id) return;
+const openChat = async (chat) => {
+  console.log("📂 openChat called", chat?._id);
 
-  const sock = socketRef.current;
-  if (!sock) {
-    console.warn("❌ socket not initialized");
+  if (!chat?._id) {
+    console.warn("⛔ openChat: invalid chat");
     return;
   }
 
-  // 1️⃣ Set active chat (do NOT clear messages yet)
   setActiveChat(chat);
+  setMessages([]);
 
-  // 2️⃣ Ensure socket is REALLY ready
-  if (!sock.connected) {
-    await whenConnected(sock);
+  const sock = socketRef.current;
+
+  if (!sock) {
+    console.error("❌ openChat: socketRef.current is NULL");
+    return;
   }
 
-  // 3️⃣ ALWAYS re-join room (safe & cheap)
-  sock.emit("join_chat", { chatId: chat._id });
+  console.log("🟡 openChat: socket exists, waiting for connection");
 
-  // 4️⃣ Request messages
+  await whenConnected(sock);
+
+  console.log("🟢 openChat: socket connected, joining room");
+
+  if (!joinedRooms.current.has(chat._id)) {
+    sock.emit("join_chat", { chatId: chat._id });
+    joinedRooms.current.add(chat._id);
+  }
+
+  console.log("📨 openChat: loading messages");
   sock.emit("load_messages", { chatId: chat._id });
-
-  // 5️⃣ Clear messages only if switching chats
-  setMessages([]);
 };
+
 
 
   /* -------------------- SEARCH / START CHAT -------------------- */

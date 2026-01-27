@@ -8,6 +8,8 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [socketReady, setSocketReady] = useState(false);
+
 
   /* ---------- Restore session ---------- */
   useEffect(() => {
@@ -27,16 +29,30 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   /* ---------- Init socket (once per auth) ---------- */
-  useEffect(() => {
-    if (!user?._id || !token) return;
+useEffect(() => {
+  if (!user?._id || !token) {
+    console.log("⛔ skipping socket init (missing user/token)");
+    return;
+  }
 
-    const socket = initSocket(token);
-    socket.connect();
+  const sock = initSocket(token);
 
-    return () => {
-      destroySocket();
-    };
-  }, [user?._id, token]);
+  console.log("🚀 calling socket.connect()");
+  sock.connect();
+
+  sock.once("connect", () => {
+  console.log("✅ socket connected → joining user chats");
+  sock.emit("join_user_chats", { userId: user._id });
+  setSocketReady(true);
+});
+
+
+  return () => {
+    destroySocket();
+    setSocketReady(false);
+  };
+}, [user?._id, token]);
+
 
   /* ---------- Login ---------- */
   const login = ({ user, token }) => {
@@ -79,6 +95,7 @@ export const AuthProvider = ({ children }) => {
         user,
         token,
         loading,
+        socketReady,
         isAuthenticated: !!user && !!token,
         login,
         logout,

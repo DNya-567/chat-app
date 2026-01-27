@@ -9,28 +9,32 @@ export const initSocket = (token) => {
   if (socket) return socket;
 
   socket = io(SOCKET_URL, {
-    autoConnect: false,
-    transports: ["websocket"],
     auth: { token },
+    transports: ["websocket"], // good choice
+    autoConnect: false,
   });
 
-  socket.on("connect", () =>
-    console.log("[socket] connected:", socket.id)
-  );
+  socket.on("connect", () => {
+    console.log("[socket] connected:", socket.id);
+  });
 
-  socket.on("disconnect", (r) =>
-    console.log("[socket] disconnected:", r)
-  );
+  socket.on("disconnect", (reason) => {
+    console.log("[socket] disconnected:", reason);
+  });
+
+  socket.on("connect_error", (err) => {
+    console.error("[socket] connect_error:", err.message);
+  });
 
   return socket;
 };
 
-export const getSocket = () => socket;
-
-export const whenConnected = (sock) =>
-  sock.connected
-    ? Promise.resolve()
-    : new Promise((res) => sock.once("connect", res));
+export const getSocket = () => {
+  if (!socket) {
+    console.error("❌ getSocket(): socket not initialized");
+  }
+  return socket;
+};
 
 export const destroySocket = () => {
   if (socket) {
@@ -38,3 +42,9 @@ export const destroySocket = () => {
     socket = null;
   }
 };
+
+export const whenConnected = (sock) =>
+  new Promise((resolve) => {
+    if (sock.connected) return resolve();
+    sock.once("connect", resolve);
+  });
