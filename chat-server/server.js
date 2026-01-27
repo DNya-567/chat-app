@@ -26,13 +26,28 @@ const userRoutes = require("./routes/users");
 /* -------------------- EXPRESS APP -------------------- */
 const app = express();
 
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://chat-93iuliacg-dnya-567s-projects.vercel.app",
+  "https://chat-rczw6ptpg-dnya-567s-projects.vercel.app",
+];
+
 app.use(cors({
-  origin: [
-    "http://localhost:5173",
-    "https://chat-rczw6ptpg-dnya-567s-projects.vercel.app"
-  ],
-  credentials: true
+  origin: function (origin, callback) {
+    // allow requests with no origin (Postman, mobile apps)
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    return callback(new Error("Not allowed by CORS"));
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
 }));
+app.options("*", cors());
+
 
 app.use(express.json());
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
@@ -51,14 +66,12 @@ const server = http.createServer(app);
 /* -------------------- SOCKET.IO -------------------- */
 const io = new Server(server, {
   cors: {
-    origin: [
-      "http://localhost:5173",
-      "https://chat-rczw6ptpg-dnya-567s-projects.vercel.app"
-    ],
+    origin: allowedOrigins,
     credentials: true,
     methods: ["GET", "POST"],
   },
 });
+
 
 
 /* ==================== SOCKET LOGIC ==================== */
