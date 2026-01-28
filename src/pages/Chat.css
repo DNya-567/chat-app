@@ -17,6 +17,12 @@
   /* ===== Accent (Linear-like indigo) ===== */
   --accent: #6366f1;
   --accent-soft: #818cf8;
+
+  /* ===== Font Variables ===== */
+  --font-family: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
+  --font-size: 14px;
+  --line-height: 1.5;
+  --letter-spacing: 0px;
 }
 
 *, *::before, *::after {
@@ -34,64 +40,6 @@
   overflow: hidden;
 }
 
-/* ====== Sidebar ====== */
-.chat-sidebar {
-  width: 280px;
-  background: var(--bg-sidebar);
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  border-right: 1px solid var(--border);
-}
-
-.chat-search {
-  width: 100%;
-  padding: 10px 12px;
-  margin: 10px 0 8px;
-  border-radius: 12px;
-  border: 1px solid var(--border);
-  background: var(--bg-input);
-  color: var(--text-primary);
-   box-sizing: border-box;
-}
-
-.chat-search::placeholder {
-  color: var(--text-muted);
-}
-
-.chat-start-btn {
-  width: 100%;
-  padding: 10px;
-  border-radius: 12px;
-  background: var(--accent);
-  color: white;
-  border: none;
-  cursor: pointer;
-  margin-bottom: 8px;
-}
-
-/* ====== Chat List ====== */
-.chat-list {
-  flex: 1;
-  overflow-y: auto;
-  margin-top: 8px;
-}
-
-.chat-item {
-  padding: 12px 14px;
-  border-radius: 12px;
-  cursor: pointer;
-  margin-bottom: 6px;
-}
-
-.chat-item:hover {
-  background: var(--hover);
-}
-
-.chat-item.active {
-  background: var(--accent);
-  color: white;
-}
 
 /* ====== Main Chat ====== */
 .chat-main {
@@ -112,11 +60,13 @@
   flex: 1;
   padding: 16px 20px;
   overflow-y: auto;
+  background: var(--bg-main);
 }
 
 .message-row {
   display: flex;
-  margin-bottom: 6px;
+  margin-bottom: 12px;
+  animation: messageSlideIn 0.3s ease-out;
 }
 
 .message-row.mine {
@@ -126,9 +76,21 @@
 .message-bubble {
   background: var(--bg-card);
   color: var(--text-primary);
-  border-radius: 14px;
-  padding: 10px 14px;
-  box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+  border-radius: 16px;
+  padding: 12px 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  max-width: 70%;
+  word-wrap: break-word;
+  font-family: var(--font-family);
+  font-size: var(--font-size);
+  line-height: var(--line-height);
+  letter-spacing: var(--letter-spacing);
+  transition: all 0.2s ease;
+}
+
+.message-bubble:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+  transform: translateY(-2px);
 }
 
 .message-bubble.mine {
@@ -138,11 +100,36 @@
     var(--accent-soft)
   );
   color: #fff;
+  border-bottom-right-radius: 4px;
 }
-
 
 .message-bubble.other {
   background: var(--bg-input);
+  border-bottom-left-radius: 4px;
+}
+
+/* Message timestamp */
+.message-time {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 4px;
+  text-align: right;
+  font-style: italic;
+}
+
+.message-bubble.other + .message-time {
+  text-align: left;
+}
+
+@keyframes messageSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ====== Input ====== */

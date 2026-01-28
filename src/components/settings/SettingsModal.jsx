@@ -2,7 +2,9 @@ import { useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import EditProfile from "./EditProfile";
 import ThemeSelector from "./ThemeSelector";
+import FontThemeSelector from "./FontThemeSelector";
 import NotificationsSettings from "./NotificationsSettings";
+import "./SettingsModal.css";
 
 export default function SettingsModal({ onClose }) {
   const [activeTab, setActiveTab] = useState("main");
@@ -37,11 +39,18 @@ export default function SettingsModal({ onClose }) {
             </div>
 
             <div
-  className="settings-item"
-  onClick={() => setActiveTab("notifications")}
->
-  🔔 Notifications
-</div>
+              className="settings-item"
+              onClick={() => setActiveTab("notifications")}
+            >
+              🔔 Notifications
+            </div>
+
+            <div
+              className="settings-item"
+              onClick={() => setActiveTab("fontTheme")}
+            >
+              📝 Message Font
+            </div>
 
             <div className="settings-item">
               🔒 Privacy
@@ -51,10 +60,12 @@ export default function SettingsModal({ onClose }) {
 
         {/* PROFILE */}
         {activeTab === "profile" && (
-          <EditProfile
-            user={user}
-            onBack={() => setActiveTab("main")}
-          />
+          <div className="settings-content">
+            <EditProfile
+              user={user}
+              onBack={() => setActiveTab("main")}
+            />
+          </div>
         )}
 
         {/* THEME */}
@@ -69,16 +80,31 @@ export default function SettingsModal({ onClose }) {
 
             <ThemeSelector />
           </div>
-          
         )}
+
+        {/* FONT THEME */}
+        {activeTab === "fontTheme" && (
+          <div className="settings-content">
+            <button
+              className="back-btn"
+              onClick={() => setActiveTab("main")}
+            >
+              ← Back
+            </button>
+
+            <FontThemeSelector />
+          </div>
+        )}
+
+        {/* NOTIFICATIONS */}
         {activeTab === "notifications" && (
-  <NotificationsSettings
-    onBack={() => setActiveTab("main")}
-  />
-)}
+          <div className="settings-content">
+            <NotificationsSettings
+              onBack={() => setActiveTab("main")}
+            />
+          </div>
+        )}
 
-
-        
       </div>
     </div>
   );

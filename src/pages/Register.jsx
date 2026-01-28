@@ -2,76 +2,116 @@ import { useState } from "react";
 import Input from "../components/common/Input";
 import Button from "../components/common/Button";
 import { registerUser } from "../services/authService";
+import "./Auth.css";
 
 function Register({ switchToLogin }) {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleRegister = async () => {
     try {
       setError("");
+      setLoading(true);
       await registerUser(username, email, password);
-
-      console.log("Redirecting to login...");
-      switchToLogin(); // go to login page
+      console.log("✅ Account created successfully!");
+      switchToLogin();
     } catch (err) {
-      console.error("Register error:", err.message);
-      setError(err.message);
+      setError(err.message || "Registration failed. Please try again.");
+      console.error("❌ Register error:", err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter" && username && email && password) {
+      handleRegister();
     }
   };
 
   return (
-    <div style={containerStyle}>
-      <h2>Register</h2>
+    <div className="auth-container">
+      <div className="auth-card">
+        {/* Header */}
+        <div className="auth-header">
+          <h1 className="auth-title">✨ Join ChatApp</h1>
+          <p className="auth-subtitle">
+            Create your account and start chatting with friends
+          </p>
+        </div>
 
-      {error && <p style={{ color: "red" }}>{error}</p>}
+        {/* Error Message */}
+        {error && (
+          <div className="auth-error">
+            <span className="error-icon">⚠️</span>
+            <span className="error-text">{error}</span>
+          </div>
+        )}
 
-      <Input
-        placeholder="Username"
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
-      />
+        {/* Form */}
+        <div className="auth-form">
+          <Input
+            type="text"
+            placeholder="Choose a username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            onKeyPress={handleKeyPress}
+            icon="👤"
+            label="Username"
+          />
 
-      <Input
-        type="email"
-        placeholder="Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-      />
+          <Input
+            type="email"
+            placeholder="Enter your email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            onKeyPress={handleKeyPress}
+            icon="📧"
+            label="Email Address"
+          />
 
-      <Input
-        type="password"
-        placeholder="Password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
+          <Input
+            type="password"
+            placeholder="Create a password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            onKeyPress={handleKeyPress}
+            icon="🔒"
+            label="Password"
+          />
 
-      <Button text="Register" onClick={handleRegister} />
+          <Button
+            text={loading ? "Creating account..." : "Register"}
+            onClick={handleRegister}
+            disabled={loading || !username || !email || !password}
+            variant="primary"
+          />
+        </div>
 
-      <p style={{ marginTop: "10px" }}>
-        Already have an account?{" "}
-        <span style={linkStyle} onClick={switchToLogin}>
-          Login
-        </span>
-      </p>
+        {/* Footer */}
+        <div className="auth-footer">
+          <p className="auth-footer-text">
+            Already have an account?{" "}
+            <span
+              className="auth-link"
+              onClick={switchToLogin}
+              role="button"
+              tabIndex="0"
+              onKeyPress={(e) => e.key === "Enter" && switchToLogin()}
+            >
+              Login here
+            </span>
+          </p>
+        </div>
+      </div>
+
+      {/* Background decoration */}
+      <div className="auth-decoration" />
     </div>
   );
 }
-
-const containerStyle = {
-  width: "350px",
-  margin: "40px auto 0",
-  padding: "20px",
-  border: "1px solid #ddd",
-  borderRadius: "8px",
-  textAlign: "center",
-};
-
-const linkStyle = {
-  color: "#4f46e5",
-  cursor: "pointer",
-};
 
 export default Register;

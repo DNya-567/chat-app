@@ -6,14 +6,17 @@ import App from "./App";
 
 import { AuthProvider } from "./context/AuthContext";
 import { ThemeProvider } from "./context/ThemeContext";
+import { FontThemeProvider } from "./context/FontThemeContext";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <ThemeProvider>
-      <AuthProvider>
-        <App />
-        <SpeedInsights />
-      </AuthProvider>
+      <FontThemeProvider>
+        <AuthProvider>
+          <App />
+          <SpeedInsights />
+        </AuthProvider>
+      </FontThemeProvider>
     </ThemeProvider>
   </StrictMode>
 );

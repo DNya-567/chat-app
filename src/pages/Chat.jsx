@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { getSocket, whenConnected } from "../services/socket";
 import { useAuth } from "../context/AuthContext";
-import ProfileCard from "../components/profile/ProfileCard";
+import IconNavbar from "../components/layout/IconNavbar";
+import MiddlePanel from "../components/layout/MiddlePanel";
+import ProfilePanel from "../components/profile/ProfilePanel";
 import SettingsModal from "../components/settings/SettingsModal";
 import "./Chat.css";
 
@@ -18,8 +20,7 @@ export default function Chat() {
 
   const [searchId, setSearchId] = useState("");
   const [searchError, setSearchError] = useState("");
-
-  //const [socketReady, setSocketReady] = useState(false);
+  const [activePanel, setActivePanel] = useState("chats");
   const [showSettings, setShowSettings] = useState(false);
 
   const socketRef = useRef(null);
@@ -256,63 +257,35 @@ const openChat = async (chat) => {
   /* -------------------- UI -------------------- */
   return (
     <div className="chat-container">
-      {/* SIDEBAR */}
-      <div className="chat-sidebar">
-        <ProfileCard user={user} />
+      {/* ICON NAVBAR */}
+      <IconNavbar
+        activePanel={activePanel}
+        setActivePanel={setActivePanel}
+        onLogout={logout}
+        onOpenSettings={() => setShowSettings(true)}
+      />
 
-        <input
-          className="chat-search"
-          placeholder="Search user by ID"
-          value={searchId}
-          onChange={(e) => setSearchId(e.target.value)}
-        />
+      {/* PROFILE PANEL - FULL WIDTH */}
+      {activePanel === "profile" ? (
+        <ProfilePanel user={user} onBack={() => setActivePanel("chats")} />
+      ) : (
+        <>
+          {/* MIDDLE PANEL */}
+          <MiddlePanel
+            activePanel={activePanel}
+            chats={chats}
+            activeChat={activeChat}
+            setActiveChat={setActiveChat}
+            searchId={searchId}
+            setSearchId={setSearchId}
+            searchError={searchError}
+            onStartChat={startChatById}
+            user={user}
+            getOtherUser={getOtherUser}
+          />
 
-        <button className="chat-start-btn" onClick={startChatById}>
-          Start Chat
-        </button>
-
-        {searchError && <div className="error">{searchError}</div>}
-
-        <div className="chat-list">
-          {chats.map((chat) => {
-            const other = getOtherUser(chat);
-            const avatar =
-              other?.avatar && other.avatar.startsWith("http")
-                ? other.avatar
-                : "https://ui-avatars.com/api/?name=" +
-                  encodeURIComponent(other?.username || "U");
-
-            return (
-              <div
-                key={chat._id}
-                onClick={() => openChat(chat)}
-                className={`chat-item ${
-                  activeChat?._id === chat._id ? "active" : ""
-                }`}
-              >
-                <img src={avatar} className="chat-avatar" alt="avatar" />
-                <span className="chat-username">
-                  {other?.username || "Unknown"}
-                </span>
-              </div>
-            );
-          })}
-        </div>
-
-        <button
-          className="chat-start-btn"
-          onClick={() => setShowSettings(true)}
-        >
-          ⚙ Settings
-        </button>
-
-        <button className="chat-start-btn" onClick={logout}>
-          Logout
-        </button>
-      </div>
-
-      {/* MAIN CHAT */}
-      <div className="chat-main">
+          {/* CHAT MAIN AREA */}
+          <div className="chat-main">
         {!activeChat ? (
           <div className="chat-messages flex-center">Select a chat</div>
         ) : (
@@ -388,7 +361,9 @@ const openChat = async (chat) => {
             </div>
           </>
         )}
-      </div>
+          </div>
+        </>
+      )}
 
       {showSettings && (
         <SettingsModal onClose={() => setShowSettings(false)} />

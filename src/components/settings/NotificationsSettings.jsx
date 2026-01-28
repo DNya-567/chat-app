@@ -1,4 +1,5 @@
 import { useState } from "react";
+import "./NotificationsSettings.css";
 
 export default function NotificationsSettings({ onBack }) {
   const [enabled, setEnabled] = useState(
@@ -19,13 +20,17 @@ export default function NotificationsSettings({ onBack }) {
   };
 
   return (
-    <div className="settings-content">
+    <div className="notifications-settings">
       <button className="back-btn" onClick={onBack}>
         ← Back
       </button>
 
+      <h3 className="notifications-title">Notification Preferences</h3>
+
       <SettingToggle
         label="Enable Notifications"
+        description="Receive notifications for new messages"
+        icon="🔔"
         value={enabled}
         onChange={(v) => {
           setEnabled(v);
@@ -35,6 +40,8 @@ export default function NotificationsSettings({ onBack }) {
 
       <SettingToggle
         label="Message Preview"
+        description="Show message content in notifications"
+        icon="👁️"
         value={preview}
         disabled={!enabled}
         onChange={(v) => {
@@ -45,6 +52,8 @@ export default function NotificationsSettings({ onBack }) {
 
       <SettingToggle
         label="Sound"
+        description="Play sound for new messages"
+        icon="🔊"
         value={sound}
         disabled={!enabled}
         onChange={(v) => {
@@ -55,34 +64,49 @@ export default function NotificationsSettings({ onBack }) {
 
       <SettingToggle
         label="Do Not Disturb"
+        description="Disable all notifications temporarily"
+        icon="😴"
         value={dnd}
         onChange={(v) => {
           setDnd(v);
           save("notify-dnd", v);
         }}
       />
+
+      <div className="profile-info">
+        💡 These settings control how you receive notifications from ChatApp.
+      </div>
     </div>
   );
 }
 
-function SettingToggle({ label, value, onChange, disabled }) {
+function SettingToggle({
+  label,
+  description,
+  icon,
+  value,
+  onChange,
+  disabled,
+}) {
   return (
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        opacity: disabled ? 0.5 : 1,
-        padding: "10px 0",
-      }}
-    >
-      <span>{label}</span>
-      <input
-        type="checkbox"
-        checked={value}
-        disabled={disabled}
-        onChange={(e) => onChange(e.target.checked)}
-      />
+    <div className={`setting-toggle ${disabled ? "disabled" : ""}`}>
+      <div className="toggle-info">
+        <span className="toggle-label">
+          {icon} {label}
+        </span>
+        {description && (
+          <span className="toggle-description">{description}</span>
+        )}
+      </div>
+      <label className="toggle-switch">
+        <input
+          type="checkbox"
+          checked={value}
+          disabled={disabled}
+          onChange={(e) => onChange(e.target.checked)}
+        />
+        <div className="toggle-knob"></div>
+      </label>
     </div>
   );
 }

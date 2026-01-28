@@ -1,36 +1,95 @@
 .right-panel {
   width: 300px;
-  background: #0f0f0f;
+  background-color: var(--bg-sidebar);
   padding: 16px;
-  border-left: 1px solid #222;
+  border-left: 1px solid var(--border);
   display: flex;
   flex-direction: column;
   height: 100vh;
+  transition: all 0.3s ease;
 }
 
 .right-panel-menu {
   flex: 1;
   margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .right-panel-item {
-  padding: 12px;
-  border-radius: 10px;
-  margin-bottom: 8px;
+  padding: 12px 16px;
+  border-radius: 8px;
   cursor: pointer;
-  background: #141414;
+  background-color: var(--bg-input);
   font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+  transition: all 0.3s ease;
+  border: 1.5px solid transparent;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .right-panel-item:hover {
-  background: #1f2933;
+  background-color: var(--hover);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.08),
+              0 0 12px rgba(99, 102, 241, 0.15);
+  transform: translateX(4px);
+}
+
+[data-theme="light"] .right-panel-item:hover {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.08),
+              0 0 12px rgba(59, 130, 246, 0.12);
+}
+
+[data-theme="neon"] .right-panel-item:hover {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.1),
+              0 0 12px rgba(34, 211, 238, 0.3);
+}
+
+.right-panel-item:active {
+  transform: translateX(2px) scale(0.97);
 }
 
 .right-panel-logout {
-  padding: 12px;
-  border-radius: 10px;
-  background: #1f1f1f;
+  padding: 12px 16px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--error) 0%, #dc2626 100%);
   border: none;
-  color: #fff;
+  color: white;
   cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-md);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+}
+
+.right-panel-logout:hover {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.right-panel-logout:active {
+  transform: translateY(-2px) scale(0.95);
+}
+
+/* =====================
+   RESPONSIVE
+===================== */
+
+@media (max-width: 768px) {
+  .right-panel {
+    width: 100%;
+    border-left: none;
+    border-top: 1px solid var(--border);
+  }
 }

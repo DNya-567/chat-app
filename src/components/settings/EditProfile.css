@@ -1,0 +1,274 @@
+/* =====================
+   EDIT PROFILE STYLES
+===================== */
+
+.edit-profile {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  animation: fadeIn 0.3s ease-out;
+  width: 100%;
+}
+
+/* =====================
+   AVATAR SECTION
+===================== */
+
+.edit-avatar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 24px;
+  background: linear-gradient(135deg, var(--bg-input) 0%, var(--hover) 100%);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.edit-avatar:hover {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.08),
+              0 0 16px rgba(99, 102, 241, 0.15);
+}
+
+[data-theme="light"] .edit-avatar:hover {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.08),
+              0 0 12px rgba(59, 130, 246, 0.12);
+}
+
+[data-theme="neon"] .edit-avatar:hover {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.1),
+              0 0 16px rgba(34, 211, 238, 0.3);
+}
+
+.edit-avatar img {
+  width: 120px;
+  height: 120px;
+  border-radius: 12px;
+  object-fit: cover;
+  border: 3px solid var(--accent);
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+}
+
+.edit-avatar img:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+}
+
+.avatar-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background-color: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-md);
+}
+
+.avatar-label:hover {
+  background-color: var(--accent-light);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.avatar-label:active {
+  transform: translateY(-2px) scale(0.95);
+}
+
+.avatar-input {
+  display: none;
+}
+
+.avatar-text {
+  font-size: 13px;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+/* =====================
+   FORM SECTION
+===================== */
+
+.edit-profile-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.form-group input {
+  padding: 12px 16px;
+  background-color: var(--bg-input);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.form-group input:hover:not(:disabled) {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.08),
+              0 0 12px rgba(99, 102, 241, 0.15);
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--focus-ring),
+              0 0 16px rgba(99, 102, 241, 0.3);
+}
+
+.form-group input::placeholder {
+  color: var(--text-muted);
+}
+
+.char-count {
+  font-size: 12px;
+  color: var(--text-muted);
+  text-align: right;
+  margin-top: 4px;
+}
+
+.form-hint {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+  font-style: italic;
+}
+
+/* =====================
+   ERROR MESSAGE
+===================== */
+
+.profile-error {
+  padding: 12px 16px;
+  background-color: rgba(239, 68, 68, 0.1);
+  border: 1.5px solid var(--error);
+  border-radius: 8px;
+  color: var(--error);
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.15);
+  animation: slideUp 0.3s ease-out;
+}
+
+/* =====================
+   ACTION BUTTONS
+===================== */
+
+.profile-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.profile-actions button {
+  flex: 1;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.save-btn {
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+  color: white;
+  box-shadow: var(--shadow-md);
+}
+
+.save-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, var(--accent-light) 0%, var(--accent) 100%);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.save-btn:active:not(:disabled) {
+  transform: translateY(-2px) scale(0.95);
+}
+
+.save-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.cancel-btn {
+  background-color: var(--bg-input);
+  color: var(--text-primary);
+  border: 1.5px solid var(--border);
+}
+
+.cancel-btn:hover {
+  background-color: var(--hover);
+  border-color: var(--text-secondary);
+  transform: translateY(-2px);
+}
+
+.cancel-btn:active {
+  transform: translateY(-2px) scale(0.95);
+}
+
+/* =====================
+   INFO TEXT
+===================== */
+
+.profile-info {
+  padding: 12px 16px;
+  background-color: var(--bg-input);
+  border-left: 3px solid var(--accent);
+  border-radius: 6px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+/* =====================
+   RESPONSIVE
+===================== */
+
+@media (max-width: 768px) {
+  .edit-avatar {
+    padding: 20px;
+  }
+
+  .edit-avatar img {
+    width: 100px;
+    height: 100px;
+  }
+
+  .profile-actions {
+    flex-direction: column;
+  }
+
+  .form-group label {
+    font-size: 13px;
+  }
+}

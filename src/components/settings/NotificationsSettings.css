@@ -1,0 +1,157 @@
+/* =====================
+   NOTIFICATIONS SETTINGS STYLES
+===================== */
+
+.notifications-settings {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  animation: fadeIn 0.3s ease-out;
+  width: 100%;
+}
+
+.notifications-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.notifications-title::before {
+  content: "🔔";
+  font-size: 20px;
+}
+
+/* =====================
+   SETTING TOGGLE
+===================== */
+
+.setting-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background-color: var(--bg-input);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+.setting-toggle:hover {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.08),
+              0 0 12px rgba(99, 102, 241, 0.15);
+  transform: translateY(-2px);
+}
+
+[data-theme="light"] .setting-toggle:hover {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.08),
+              0 0 12px rgba(59, 130, 246, 0.12);
+}
+
+[data-theme="neon"] .setting-toggle:hover {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.1),
+              0 0 12px rgba(34, 211, 238, 0.3);
+}
+
+.setting-toggle.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.toggle-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.toggle-label {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.toggle-description {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+/* =====================
+   TOGGLE SWITCH
+===================== */
+
+.toggle-switch {
+  position: relative;
+  width: 50px;
+  height: 28px;
+  background-color: var(--border);
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.setting-toggle:hover:not(.disabled) .toggle-switch {
+  background-color: var(--accent);
+  box-shadow: 0 0 8px rgba(99, 102, 241, 0.3);
+}
+
+.toggle-switch input {
+  display: none;
+}
+
+.toggle-switch input:checked + .toggle-knob {
+  transform: translateX(22px);
+}
+
+.toggle-switch input:checked ~ .toggle-switch-bg {
+  background-color: var(--accent);
+}
+
+.toggle-knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 24px;
+  height: 24px;
+  background-color: white;
+  border-radius: 50%;
+  transition: transform 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* =====================
+   RESPONSIVE
+===================== */
+
+@media (max-width: 768px) {
+  .setting-toggle {
+    padding: 14px 16px;
+  }
+
+  .toggle-label {
+    font-size: 14px;
+  }
+
+  .toggle-description {
+    font-size: 12px;
+  }
+
+  .toggle-switch {
+    width: 46px;
+    height: 26px;
+  }
+
+  .toggle-knob {
+    width: 22px;
+    height: 22px;
+  }
+
+  .toggle-switch input:checked + .toggle-knob {
+    transform: translateX(20px);
+  }
+}
