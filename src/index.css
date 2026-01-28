@@ -1,39 +1,93 @@
 /* =====================
-   THEME TOKENS
+   THEME TOKENS - DARK THEME (Default)
 ===================== */
 
 :root {
-  --bg-main: #0e0e10;
-  --bg-sidebar: #141417;
-  --bg-surface: #0f172a;
-  --bg-input: #1f2933;
+  /* Backgrounds - Professional Navy-Black */
+  --bg-main: #0f1419;
+  --bg-sidebar: #1a1f2e;
+  --bg-surface: #232d3f;
+  --bg-input: #1a1f2e;
 
-  --text-primary: #e5e7eb;
-  --text-muted: #9ca3af;
+  /* Text Colors */
+  --text-primary: #f0f4f8;
+  --text-secondary: #a0aec0;
+  --text-muted: #718096;
 
-  --border: #1f2933;
-  --accent: #4f46e5;
+  /* Borders & Dividers */
+  --border: #2d3748;
+  --border-light: #4a5568;
 
-  --hover: #1f2933;
+  /* Accent Colors - Indigo Professional */
+  --accent: #6366f1;
+  --accent-light: #818cf8;
+  --accent-dark: #4f46e5;
+  --accent-hover: rgba(99, 102, 241, 0.1);
+
+  /* Status Colors */
+  --success: #10b981;
+  --error: #ef4444;
+  --warning: #f59e0b;
+  --info: #3b82f6;
+
+  /* Interactive States */
+  --hover: #2d3748;
+  --active: #374151;
+  --focus-ring: rgba(99, 102, 241, 0.3);
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.2);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.3);
 }
 
-/* LIGHT THEME */
+/* =====================
+   LIGHT THEME
+===================== */
 [data-theme="light"] {
-  --bg-main: #f4f4f5;
-  --bg-sidebar: #ffffff;
+  /* Backgrounds - Clean Soft White */
+  --bg-main: #ffffff;
+  --bg-sidebar: #f8fafc;
   --bg-surface: #ffffff;
   --bg-input: #f1f5f9;
 
-  --text-primary: #111827;
-  --text-muted: #6b7280;
+  /* Text Colors */
+  --text-primary: #0f172a;
+  --text-secondary: #64748b;
+  --text-muted: #94a3b8;
 
-  --border: #e5e7eb;
-  --accent: #2563eb;
+  /* Borders & Dividers */
+  --border: #e2e8f0;
+  --border-light: #cbd5e1;
 
-  --hover: #e5e7eb;
+  /* Accent Colors - Blue Professional */
+  --accent: #3b82f6;
+  --accent-light: #60a5fa;
+  --accent-dark: #2563eb;
+  --accent-hover: rgba(59, 130, 246, 0.08);
+
+  /* Status Colors */
+  --success: #059669;
+  --error: #dc2626;
+  --warning: #d97706;
+  --info: #0284c7;
+
+  /* Interactive States */
+  --hover: #f1f5f9;
+  --active: #e2e8f0;
+  --focus-ring: rgba(59, 130, 246, 0.2);
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.12);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);
 }
 
-/* NEON THEME */
+/* =====================
+   NEON THEME
+===================== */
 [data-theme="neon"] {
   --bg-main: #020617;
   --bg-sidebar: #020617;
@@ -41,12 +95,199 @@
   --bg-input: #020617;
 
   --text-primary: #e0f2fe;
-  --text-muted: #38bdf8;
+  --text-secondary: #38bdf8;
+  --text-muted: #06b6d4;
 
   --border: #0ea5e9;
+  --border-light: #06b6d4;
+
   --accent: #22d3ee;
+  --accent-light: #06b6d4;
+  --accent-dark: #0891b2;
+  --accent-hover: rgba(34, 211, 238, 0.15);
+
+  --success: #10b981;
+  --error: #ef4444;
+  --warning: #f59e0b;
+  --info: #22d3ee;
 
   --hover: rgba(56, 189, 248, 0.15);
+  --active: rgba(34, 211, 238, 0.2);
+  --focus-ring: rgba(34, 211, 238, 0.3);
+
+  --shadow-sm: 0 0 10px rgba(34, 211, 238, 0.1);
+  --shadow-md: 0 0 20px rgba(34, 211, 238, 0.15);
+  --shadow-lg: 0 0 30px rgba(34, 211, 238, 0.2);
+  --shadow-xl: 0 0 40px rgba(34, 211, 238, 0.25);
+}
+
+/* =====================
+   ANIMATIONS & KEYFRAMES
+===================== */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes ripple {
+  0% {
+    width: 0;
+    height: 0;
+    opacity: 1;
+  }
+  100% {
+    width: 300px;
+    height: 300px;
+    opacity: 0;
+  }
+}
+
+@keyframes buttonHover {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-2px);
+  }
+}
+
+@keyframes buttonPress {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(0.95);
+  }
+}
+
+@keyframes focusGlow {
+  from {
+    box-shadow: 0 0 0 0 var(--focus-ring);
+  }
+  to {
+    box-shadow: 0 0 0 6px transparent;
+  }
+}
+
+/* =====================
+   GLOBAL STYLES
+===================== */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--bg-main);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+#root {
+  width: 100%;
+  height: 100%;
+  background-color: var(--bg-main);
+}
+
+/* =====================
+   BUTTON STYLES
+===================== */
+
+button {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+button:hover:not(:disabled) {
+  animation: buttonHover 0.2s ease forwards;
+}
+
+button:active:not(:disabled) {
+  animation: buttonPress 0.15s ease forwards;
+}
+
+button:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* =====================
+   INPUT STYLES
+===================== */
+
+input, textarea {
+  background-color: var(--bg-input);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px 12px;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+input::placeholder {
+  color: var(--text-muted);
+}
+
+input:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--focus-ring);
+}
+
+input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* =====================
+   LINK STYLES
+===================== */
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: var(--accent-light);
+}
+
+a:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 2px;
 }
 
 /* Global apply */

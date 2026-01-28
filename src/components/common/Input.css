@@ -1,0 +1,193 @@
+/* =====================
+   INPUT COMPONENT STYLES
+===================== */
+
+.input-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.input-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  display: block;
+  margin-bottom: 4px;
+}
+
+.input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.input-icon {
+  position: absolute;
+  left: 14px;
+  font-size: 18px;
+  color: var(--text-secondary);
+  z-index: 2;
+  pointer-events: none;
+  transition: all 0.3s ease;
+}
+
+.input-field {
+  width: 100%;
+  padding: 14px 16px;
+  padding-left: 44px;
+  font-size: 15px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  background-color: var(--bg-input);
+  color: var(--text-primary);
+  transition: all 0.3s ease;
+  outline: none;
+  box-shadow: 0 0 0 0 transparent;
+}
+
+.input-field:not(.with-icon) {
+  padding-left: 16px;
+}
+
+.input-field::placeholder {
+  color: var(--text-muted);
+}
+
+/* =====================
+   INPUT HOVER STATE - GLOW EFFECT
+===================== */
+
+.input-field:hover:not(:focus) {
+  border-color: var(--accent);
+  background-color: var(--bg-input);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.08),
+              0 0 12px rgba(99, 102, 241, 0.2);
+  transform: translateY(-2px);
+}
+
+[data-theme="light"] .input-field:hover:not(:focus) {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.08),
+              0 0 12px rgba(59, 130, 246, 0.15);
+  border-color: var(--accent);
+}
+
+[data-theme="neon"] .input-field:hover:not(:focus) {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.15),
+              0 0 20px rgba(34, 211, 238, 0.4);
+}
+
+/* =====================
+   INPUT FOCUS STATE - ENHANCED GLOW
+===================== */
+
+.input-field:focus {
+  border-color: var(--accent);
+  background-color: var(--bg-input);
+  box-shadow: 0 0 0 3px var(--focus-ring),
+              0 0 20px rgba(99, 102, 241, 0.3);
+  transform: translateY(-2px);
+}
+
+[data-theme="light"] .input-field:focus {
+  box-shadow: 0 0 0 3px var(--focus-ring),
+              0 0 16px rgba(59, 130, 246, 0.25);
+}
+
+/* Neon theme enhanced glow effect */
+[data-theme="neon"] .input-field:focus {
+  box-shadow: 0 0 0 3px var(--focus-ring),
+              0 0 25px rgba(34, 211, 238, 0.6),
+              0 0 40px rgba(34, 211, 238, 0.2);
+  border-color: var(--accent);
+}
+
+.input-field:focus ~ .input-icon {
+  color: var(--accent);
+  transform: scale(1.15);
+}
+
+/* =====================
+   INPUT DISABLED STATE
+===================== */
+
+.input-field:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: var(--hover);
+  transform: none;
+}
+
+/* =====================
+   ERROR STATE
+===================== */
+
+.input-field.input-error {
+  border-color: var(--error);
+}
+
+.input-field.input-error:hover:not(:focus) {
+  border-color: var(--error);
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1),
+              0 0 12px rgba(239, 68, 68, 0.2);
+}
+
+.input-field.input-error:focus {
+  border-color: var(--error);
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2),
+              0 0 16px rgba(239, 68, 68, 0.3);
+}
+
+.input-error-message {
+  font-size: 13px;
+  color: var(--error);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.input-error-message::before {
+  content: "⚠️";
+}
+
+/* =====================
+   ANIMATION KEYFRAMES
+===================== */
+
+@keyframes inputGlow {
+  0% {
+    box-shadow: 0 0 0 0 var(--focus-ring);
+  }
+  50% {
+    box-shadow: 0 0 10px 5px rgba(99, 102, 241, 0.3);
+  }
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
+/* =====================
+   RESPONSIVE
+===================== */
+
+@media (max-width: 768px) {
+  .input-field {
+    font-size: 16px;
+    padding: 12px 12px;
+    padding-left: 40px;
+  }
+
+  .input-field:not(.with-icon) {
+    padding-left: 12px;
+  }
+
+  .input-icon {
+    font-size: 16px;
+    left: 12px;
+  }
+}

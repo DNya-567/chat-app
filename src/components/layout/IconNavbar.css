@@ -1,0 +1,369 @@
+/* Icon Navbar Enhanced Styles */
+
+.icon-navbar {
+  width: 50px;
+  height: 100vh;
+  background: linear-gradient(135deg, var(--bg-surface) 0%, var(--bg-input) 100%);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 6px 0;
+  gap: 6px;
+  overflow-y: auto;
+  box-shadow: 1px 0 6px rgba(0, 0, 0, 0.1);
+  animation: fadeIn 0.3s ease-out;
+}
+
+.icon-navbar-header {
+  padding: 4px 4px;
+  text-align: center;
+  margin-bottom: 1px;
+  display: none;
+}
+
+.icon-navbar-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.icon-navbar-logo {
+  font-size: 22px;
+  display: block;
+  animation: popIn 0.4s ease-out;
+}
+
+.icon-navbar-title {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  opacity: 0.7;
+}
+
+.icon-navbar-divider {
+  width: 30%;
+  height: 0.5px;
+  background: linear-gradient(90deg, transparent, var(--border), transparent);
+  margin: 1px 0;
+}
+
+.icon-navbar-icons {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+  flex: 1;
+}
+
+.icon-item {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background-color: var(--bg-input);
+  border: 1px solid transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.icon-item-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--icon-color, var(--accent));
+  opacity: 0;
+  transition: all 0.3s ease;
+  z-index: 0;
+}
+
+.icon-item:hover .icon-item-background {
+  opacity: 0.1;
+}
+
+.icon-item.active .icon-item-background {
+  opacity: 0.15;
+}
+
+.icon-item:hover {
+  background-color: var(--hover);
+  border-color: var(--accent);
+  transform: translateY(-4px);
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.08), 0 6px 16px rgba(99, 102, 241, 0.2);
+}
+
+.icon-item.active {
+  background: linear-gradient(135deg, var(--accent) 0%, var(--hover) 100%);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.15), 0 0 16px rgba(99, 102, 241, 0.3),
+    inset 0 0 8px rgba(99, 102, 241, 0.12);
+  transform: scale(1.06) translateY(0);
+}
+
+.icon-item.pressed {
+  transform: scale(0.93);
+  box-shadow: 0 0 0 1.5px rgba(99, 102, 241, 0.25), 0 1px 4px rgba(0, 0, 0, 0.25),
+    inset 0 1px 4px rgba(0, 0, 0, 0.15);
+}
+
+.icon-item.pressed .icon-emoji {
+  transform: scale(0.93);
+}
+
+.icon-emoji {
+  font-size: 22px;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  position: relative;
+}
+
+.icon-item:hover .icon-emoji {
+  transform: scale(1.2) rotate(12deg);
+  filter: drop-shadow(0 0 6px rgba(99, 102, 241, 0.3));
+}
+
+.icon-item.active .icon-emoji {
+  transform: scale(1.15) rotate(8deg);
+  filter: drop-shadow(0 0 4px rgba(99, 102, 241, 0.3));
+}
+
+.icon-item-indicator {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background-color: var(--accent);
+  opacity: 0;
+  transform: scale(0);
+  transition: all 0.3s ease;
+}
+
+.icon-item.active .icon-item-indicator {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.icon-tooltip {
+  position: absolute;
+  left: 60px;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: var(--accent);
+  color: white;
+  padding: 5px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 1000;
+  box-shadow: 0 2px 10px rgba(99, 102, 241, 0.3);
+  animation: tooltipSlideIn 0.2s ease-out;
+}
+
+@keyframes tooltipSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-50%) translateX(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+  }
+}
+
+.icon-logout-btn {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background-color: var(--bg-input);
+  border: 1px solid transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  margin-top: auto;
+  overflow: hidden;
+  user-select: none;
+}
+
+.icon-logout-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  opacity: 0;
+  transition: all 0.3s ease;
+  z-index: 0;
+}
+
+.icon-logout-btn:hover .icon-logout-background {
+  opacity: 0.15;
+}
+
+.icon-logout-btn:hover {
+  background: linear-gradient(135deg, #7f1d1d 0%, #5f0f0f 100%);
+  border-color: #ef4444;
+  transform: translateY(-4px);
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.1), 0 6px 16px rgba(239, 68, 68, 0.25);
+}
+
+.icon-logout-btn.pressed {
+  transform: scale(0.93);
+  box-shadow: 0 0 0 1.5px rgba(239, 68, 68, 0.25), 0 1px 4px rgba(0, 0, 0, 0.25),
+    inset 0 1px 4px rgba(0, 0, 0, 0.15);
+}
+
+.icon-logout-btn.pressed .icon-emoji {
+  transform: scale(0.93);
+}
+
+.icon-logout-btn:hover .icon-emoji {
+  transform: scale(1.25) rotate(12deg);
+  filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0.4));
+}
+
+.icon-navbar-footer {
+  padding: 4px;
+  text-align: center;
+  margin-top: 1px;
+  display: none;
+}
+
+.icon-navbar-version {
+  font-size: 9px;
+  color: var(--text-muted);
+  opacity: 0.5;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+/* Touch Device Responsiveness */
+@media (hover: none) and (pointer: coarse) {
+  .icon-item,
+  .icon-logout-btn {
+    transition: all 0.2s ease;
+  }
+
+  .icon-item:active {
+    transform: scale(0.91);
+    background-color: var(--hover);
+    border-color: var(--accent);
+  }
+
+  .icon-logout-btn:active {
+    transform: scale(0.91);
+  }
+
+  .icon-tooltip {
+    display: none;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes popIn {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.15);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .icon-navbar {
+    width: 50px;
+    padding: 6px 0;
+    gap: 5px;
+  }
+
+  .icon-item,
+  .icon-logout-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 9px;
+  }
+
+  .icon-emoji {
+    font-size: 20px;
+  }
+
+  .icon-navbar-title {
+    display: none;
+  }
+
+  .icon-navbar-logo {
+    display: none;
+  }
+
+  .icon-tooltip {
+    font-size: 10px;
+    padding: 4px 6px;
+  }
+}
+
+@media (max-width: 480px) {
+  .icon-navbar {
+    width: 50px;
+    padding: 5px 0;
+    gap: 4px;
+  }
+
+  .icon-item,
+  .icon-logout-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+  }
+
+  .icon-emoji {
+    font-size: 18px;
+  }
+
+  .icon-navbar-header {
+    display: none;
+  }
+
+  .icon-navbar-footer {
+    display: none;
+  }
+
+  .icon-navbar-divider {
+    display: none;
+  }
+}

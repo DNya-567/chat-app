@@ -1,15 +1,15 @@
 /* =====================
-   THEME SELECTOR STYLES
+   FONT THEME SELECTOR STYLES
 ===================== */
 
-.theme-selector {
+.font-theme-selector {
   display: flex;
   flex-direction: column;
   gap: 20px;
   animation: fadeIn 0.3s ease-out;
 }
 
-.theme-title {
+.font-theme-title {
   font-size: 18px;
   font-weight: 700;
   color: var(--text-primary);
@@ -19,37 +19,32 @@
   gap: 8px;
 }
 
-.theme-title::before {
-  content: "🎨";
-  font-size: 20px;
-}
-
 /* =====================
-   THEME OPTIONS
+   FONT THEME OPTIONS
 ===================== */
 
-.theme-options {
+.font-theme-options {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 16px;
 }
 
-.theme-option {
+.font-theme-option {
   position: relative;
   cursor: pointer;
 }
 
-.theme-option input {
+.font-theme-option input {
   display: none;
 }
 
-.theme-card {
+.font-theme-card {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  padding: 20px;
+  gap: 8px;
+  padding: 16px;
   background-color: var(--bg-input);
   border: 2px solid var(--border);
   border-radius: 12px;
@@ -60,10 +55,10 @@
 }
 
 /* =====================
-   THEME CARD HOVER STATE
+   FONT CARD HOVER STATE
 ===================== */
 
-.theme-option:hover .theme-card {
+.font-theme-option:hover .font-theme-card {
   border-color: var(--accent);
   background-color: var(--hover);
   transform: translateY(-4px);
@@ -71,37 +66,37 @@
               0 0 20px rgba(99, 102, 241, 0.2);
 }
 
-[data-theme="light"] .theme-option:hover .theme-card {
+[data-theme="light"] .font-theme-option:hover .font-theme-card {
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.08),
               0 0 16px rgba(59, 130, 246, 0.15);
 }
 
-[data-theme="neon"] .theme-option:hover .theme-card {
+[data-theme="neon"] .font-theme-option:hover .font-theme-card {
   border-color: var(--accent);
   box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.1),
               0 0 20px rgba(34, 211, 238, 0.4);
 }
 
 /* =====================
-   THEME CARD ACTIVE STATE
+   FONT CARD ACTIVE STATE
 ===================== */
 
-.theme-option input:checked + .theme-card {
+.font-theme-option input:checked + .font-theme-card {
   border-color: var(--accent);
-  background: linear-gradient(135deg, var(--accent-hover) 0%, var(--bg-input) 100%);
+  background: linear-gradient(135deg, var(--hover) 0%, var(--bg-input) 100%);
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2),
               0 0 24px rgba(99, 102, 241, 0.3),
               inset 0 0 12px rgba(99, 102, 241, 0.1);
   transform: scale(1.05);
 }
 
-[data-theme="light"] .theme-option input:checked + .theme-card {
+[data-theme="light"] .font-theme-option input:checked + .font-theme-card {
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2),
               0 0 20px rgba(59, 130, 246, 0.25),
               inset 0 0 12px rgba(59, 130, 246, 0.1);
 }
 
-[data-theme="neon"] .theme-option input:checked + .theme-card {
+[data-theme="neon"] .font-theme-option input:checked + .font-theme-card {
   background: linear-gradient(135deg, var(--accent) 0%, var(--bg-input) 100%);
   box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.3),
               0 0 28px rgba(34, 211, 238, 0.5),
@@ -109,31 +104,38 @@
 }
 
 /* =====================
-   THEME ICON & LABEL
+   FONT ICON & LABEL
 ===================== */
 
-.theme-icon {
+.font-theme-icon {
   font-size: 32px;
   transition: all 0.3s ease;
 }
 
-.theme-option:hover .theme-icon,
-.theme-option input:checked + .theme-card .theme-icon {
+.font-theme-option:hover .font-theme-icon,
+.font-theme-option input:checked + .font-theme-card .font-theme-icon {
   transform: scale(1.2) rotate(10deg);
 }
 
-.theme-label {
-  font-size: 15px;
+.font-theme-label {
+  font-size: 14px;
   font-weight: 600;
   color: var(--text-primary);
   transition: all 0.3s ease;
+}
+
+.font-theme-preview {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin: 0;
+  font-style: italic;
 }
 
 /* =====================
    ACTIVE INDICATOR
 ===================== */
 
-.theme-option input:checked + .theme-card::after {
+.font-theme-option input:checked + .font-theme-card::after {
   content: "✓";
   position: absolute;
   top: 8px;
@@ -167,24 +169,47 @@
 }
 
 /* =====================
+   PREVIEW BOX
+===================== */
+
+.font-theme-preview-box {
+  padding: 16px;
+  background-color: var(--bg-input);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  margin-top: 12px;
+}
+
+.font-theme-description {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* =====================
    RESPONSIVE
 ===================== */
 
 @media (max-width: 768px) {
-  .theme-options {
+  .font-theme-options {
     grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
     gap: 12px;
   }
 
-  .theme-card {
-    padding: 16px;
+  .font-theme-card {
+    padding: 12px;
   }
 
-  .theme-icon {
+  .font-theme-icon {
     font-size: 28px;
   }
 
-  .theme-label {
-    font-size: 14px;
+  .font-theme-label {
+    font-size: 13px;
+  }
+
+  .font-theme-preview {
+    font-size: 11px;
   }
 }
