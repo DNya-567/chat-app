@@ -1,0 +1,53 @@
+config:
+  target: "https://chat-app-1-zpha.onrender.com"
+  phases:
+    # Warm-up
+    - duration: 30
+      arrivalRate: 2
+
+    # Baseline
+    - duration: 60
+      arrivalRate: 5
+
+    # Stress
+    - duration: 60
+      arrivalRate: 10
+
+    # Push to limit
+    - duration: 60
+      arrivalRate: 15
+
+    # Final push
+    - duration: 60
+      arrivalRate: 20
+
+  engines:
+    socketio: {}
+
+scenarios:
+  - name: "socket-io-chat-test"
+    engine: socketio
+    flow:
+      # Simulate user joining their personal room
+      - emit:
+          channel: "join_user_chats"
+          data:
+            userId: "64b000000000000000000001"
+
+      - think: 1
+
+      # Simulate opening a chat
+      - emit:
+          channel: "join_chat"
+          data:
+            chatId: "64b00000000000000000000002"
+
+      - think: 1
+
+      # Simulate sending a message (NO DB validation here)
+      - emit:
+          channel: "send_message"
+          data:
+            chatId: "64b00000000000000000000002"
+            senderId: "64b00000000000000000000001"
+            text: "load test message"
