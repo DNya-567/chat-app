@@ -1,0 +1,250 @@
+.message-actions-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+.message-actions-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  opacity: 0;
+  margin-left: 8px;
+}
+
+.message-bubble:hover .message-actions-btn {
+  opacity: 1;
+  background-color: var(--hover);
+}
+
+.message-actions-btn:hover {
+  color: var(--accent);
+  background-color: var(--hover);
+  transform: scale(1.1);
+}
+
+.message-actions-menu {
+  position: absolute;
+  background: var(--bg-surface);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  min-width: 160px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  z-index: 10000;
+  animation: slideUp 0.2s ease-out;
+  overflow: hidden;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.message-action-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 14px;
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+  font-size: 14px;
+  position: relative;
+}
+
+.message-action-item:hover:not(.disabled) {
+  background-color: var(--hover);
+  padding-left: 16px;
+}
+
+.message-action-item.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  position: relative;
+}
+
+.action-icon {
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+}
+
+.action-text {
+  flex: 1;
+  font-weight: 500;
+}
+
+.coming-soon {
+  font-size: 11px;
+  color: var(--text-muted);
+  background: var(--bg-input);
+  padding: 2px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.reply-action {
+  color: var(--accent);
+}
+
+.reply-action:hover {
+  background: rgba(99, 102, 241, 0.1);
+}
+
+.delete-action {
+  color: #ef4444;
+}
+
+.delete-action:hover {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.message-action-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 4px 0;
+}
+
+.emoji-submenu {
+  position: relative;
+}
+
+.emoji-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.emoji-trigger:hover {
+  background-color: var(--hover);
+  padding-left: 16px;
+}
+
+.arrow {
+  margin-left: auto;
+  color: var(--text-muted);
+  font-size: 16px;
+}
+
+.emoji-picker {
+  position: fixed;
+  background: var(--bg-surface);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 8px;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 4px;
+  min-width: 280px;
+  max-height: 200px;
+  overflow-y: auto;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  z-index: 9999;
+  animation: slideUp 0.2s ease-out;
+  pointer-events: auto;
+  scroll-behavior: smooth;
+}
+
+.emoji-picker::-webkit-scrollbar {
+  width: 6px;
+}
+
+.emoji-picker::-webkit-scrollbar-track {
+  background: var(--bg-input);
+  border-radius: 3px;
+}
+
+.emoji-picker::-webkit-scrollbar-thumb {
+  background: var(--accent);
+  border-radius: 3px;
+}
+
+.emoji-picker::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-soft);
+}
+
+.emoji-option {
+  background: none;
+  border: 1px solid transparent;
+  padding: 6px;
+  border-radius: 6px;
+  font-size: 20px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 32px;
+  pointer-events: auto;
+  user-select: none;
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+.emoji-option:hover {
+  background-color: var(--hover);
+  border-color: var(--accent);
+  transform: scale(1.2);
+}
+
+.emoji-option:active {
+  transform: scale(1.1);
+  background-color: var(--accent);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .message-actions-menu {
+    min-width: 140px;
+  }
+
+  .emoji-picker {
+    grid-template-columns: repeat(4, 1fr);
+    min-width: 180px;
+    max-height: 180px;
+  }
+
+  .message-action-item {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+
+  .emoji-trigger {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+
+  .message-actions-btn {
+    padding: 2px 4px;
+    font-size: 18px;
+  }
+}
