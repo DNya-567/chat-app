@@ -26,6 +26,7 @@ const chatRoutes = require("./routes/chat");
 const userRoutes = require("./routes/users");
 const messagesRoutes = require("./routes/messages");
 
+
 /* -------------------- EXPRESS APP -------------------- */
 const app = express();
 
@@ -67,6 +68,12 @@ app.use(cors({
 }));
 
 app.use(express.json());
+
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "ok" });
+});
+
+
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 /* -------------------- SWAGGER UI -------------------- */
@@ -78,6 +85,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/chats", chatRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/messages", messagesRoutes);
+
+
 
 /* -------------------- DATABASE -------------------- */
 connectDB();
