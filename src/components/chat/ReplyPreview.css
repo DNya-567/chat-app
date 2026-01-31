@@ -1,0 +1,128 @@
+.reply-preview {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(129, 140, 248, 0.1) 100%);
+  border-left: 3px solid var(--accent);
+  border-radius: 8px;
+  margin-bottom: 8px;
+  border: 1px solid var(--accent);
+  animation: slideDown 0.3s ease-out;
+  box-shadow: 0 1px 4px rgba(99, 102, 241, 0.08);
+  max-height: 50px;
+  overflow: hidden;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.reply-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.reply-icon {
+  font-size: 16px;
+  flex-shrink: 0;
+  color: var(--accent);
+  font-weight: bold;
+}
+
+.reply-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.reply-to {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.reply-label {
+  font-size: 10px;
+  color: var(--accent);
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  background: rgba(99, 102, 241, 0.15);
+  padding: 1px 4px;
+  border-radius: 2px;
+  width: fit-content;
+}
+
+.reply-user {
+  font-weight: 700;
+  color: var(--accent);
+  font-size: 11px;
+}
+
+.reply-text {
+  font-size: 11px;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  opacity: 0.85;
+  font-weight: 500;
+}
+
+.reply-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 16px;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  margin-left: 6px;
+}
+
+.reply-close:hover {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  transform: scale(1.1);
+}
+
+@media (max-width: 768px) {
+  .reply-preview {
+    padding: 6px 10px;
+    max-height: 45px;
+    margin-bottom: 6px;
+  }
+
+  .reply-user,
+  .reply-label {
+    font-size: 9px;
+  }
+
+  .reply-text {
+    font-size: 10px;
+  }
+
+  .reply-icon {
+    font-size: 14px;
+  }
+
+  .reply-close {
+    font-size: 14px;
+    padding: 1px 4px;
+  }
+}

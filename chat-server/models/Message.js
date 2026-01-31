@@ -32,6 +32,13 @@ const messageSchema = new mongoose.Schema(
       required: true,
     },
 
+    // Reply reference to another message
+    replyTo: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Message",
+      default: null,
+    },
+
     reactions: {
       type: [reactionSchema],
       default: [],
