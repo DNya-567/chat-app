@@ -1,6 +1,7 @@
-import User from "../models/User.js";
+const User = require("../models/User");
+const cloudinary = require("../config/cloudinary");
 
-export const updateProfile = async (req, res) => {
+const updateProfile = async (req, res) => {
   try {
     const { username } = req.body;
     const userId = req.userId || req.body.userId;
@@ -31,3 +32,6 @@ export const updateProfile = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+module.exports = { updateProfile };
+

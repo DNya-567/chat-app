@@ -6,6 +6,8 @@ export default function MessageActions({
   onReply,
   onDelete,
   onReact,
+  onPin,
+  onEdit,
   isOwn,
 }) {
   const [showMenu, setShowMenu] = useState(false);
@@ -16,6 +18,9 @@ export default function MessageActions({
   const menuBtnRef = useRef(null);
   const emojiTriggerRef = useRef(null);
   const emojiPickerRef = useRef(null);
+
+  const MENU_MARGIN = 8;
+  const MENU_DEFAULT_WIDTH = 180;
 
   const emojis = [
     "👍", "❤️", "😂", "😢", "😮", "😡",
@@ -42,9 +47,13 @@ export default function MessageActions({
       setShowEmojiPicker(false);
     };
 
-    // Use 'mousedown' so we catch early interactions, but ensure our handlers stop propagation
-    document.addEventListener("click", handleClickOutside);
-    return () => document.removeEventListener("click", handleClickOutside);
+    // Use 'mousedown' so we catch early interactions
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("touchstart", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
+    };
   }, []);
 
   const handleReply = () => {
@@ -54,6 +63,16 @@ export default function MessageActions({
 
   const handleDelete = () => {
     onDelete(message._id);
+    setShowMenu(false);
+  };
+
+  const handlePin = () => {
+    onPin(message._id);
+    setShowMenu(false);
+  };
+
+  const handleEdit = () => {
+    onEdit(message);
     setShowMenu(false);
   };
 
@@ -85,22 +104,42 @@ export default function MessageActions({
     e.stopPropagation();
     if (menuBtnRef.current) {
       const rect = menuBtnRef.current.getBoundingClientRect();
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+
+      let top = rect.bottom + 6;
+      let left = rect.left;
+
+      // Clamp horizontally within viewport
+      if (left + MENU_DEFAULT_WIDTH > viewportWidth - MENU_MARGIN) {
+        left = Math.max(MENU_MARGIN, viewportWidth - MENU_DEFAULT_WIDTH - MENU_MARGIN);
+      } else {
+        left = Math.max(MENU_MARGIN, left);
+      }
+
+      // Basic vertical clamp to keep menu visible in viewport
+      const estimatedMenuHeight = 280;
+      if (top + estimatedMenuHeight > viewportHeight - MENU_MARGIN) {
+        top = Math.max(MENU_MARGIN, rect.top - estimatedMenuHeight - 6);
+      }
+
       setMenuPosition({
-        top: rect.bottom + 6,
-        // Position aligned under the button to avoid gaps
-        left: Math.max(8, rect.left),
+        top,
+        left,
       });
     }
     setShowMenu((s) => !s);
   };
 
   return (
-    <div className="message-actions-container" ref={menuRef}>
+    <div className={`message-actions-container ${showMenu ? "menu-open" : ""}`} ref={menuRef}>
       {/* Settings Button */}
       <button
         ref={menuBtnRef}
         className="message-actions-btn"
         onClick={handleMenuClick}
+        onMouseDown={(e) => e.stopPropagation()}
+        onTouchStart={(e) => e.stopPropagation()}
         title="Message options"
       >
         ⋮
@@ -114,6 +153,8 @@ export default function MessageActions({
             top: `${menuPosition.top}px`,
             left: `${menuPosition.left}px`,
           }}
+          onMouseDown={(e) => e.stopPropagation()}
+          onTouchStart={(e) => e.stopPropagation()}
         >
           {/* Reply Option */}
           <button
@@ -174,22 +215,30 @@ export default function MessageActions({
             </button>
           )}
 
-          {/* Divider for future actions */}
+          {/* Divider */}
           <div className="message-action-divider"></div>
 
-          {/* Placeholder for future actions */}
-          <div className="message-action-item disabled">
-            <span className="action-icon">📌</span>
-            <span className="action-text">Pin</span>
-            <span className="coming-soon">Soon</span>
-          </div>
+          {/* Pin Option - Available to all users */}
+          <button
+            className="message-action-item pin-action"
+            onClick={handlePin}
+          >
+            <span className="action-icon">{message.pinned ? "📌" : "📍"}</span>
+            <span className="action-text">{message.pinned ? "Unpin" : "Pin"}</span>
+          </button>
 
-          <div className="message-action-item disabled">
-            <span className="action-icon">✏️</span>
-            <span className="action-text">Edit</span>
-            <span className="coming-soon">Soon</span>
-          </div>
+          {/* Edit Option - Only for own messages */}
+          {isOwn && !message.deleted && (
+            <button
+              className="message-action-item edit-action"
+              onClick={handleEdit}
+            >
+              <span className="action-icon">✏️</span>
+              <span className="action-text">Edit</span>
+            </button>
+          )}
 
+          {/* Forward Option - Placeholder for future */}
           <div className="message-action-item disabled">
             <span className="action-icon">⚡</span>
             <span className="action-text">Forward</span>

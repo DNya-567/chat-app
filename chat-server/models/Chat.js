@@ -10,6 +10,12 @@ const chatSchema = new mongoose.Schema(
         required: true,
       },
     ],
+    pinnedMessages: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Message",
+      },
+    ],
   },
   { timestamps: true }
 );

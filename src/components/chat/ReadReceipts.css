@@ -1,0 +1,21 @@
+.read-receipt {
+  font-size: 0.75rem;
+  color: #888;
+  margin-top: 4px;
+  font-weight: bold;
+  display: inline-block;
+  transition: color 0.3s ease;
+}
+
+.read-receipt.delivered {
+  color: #a8a8a8;
+}
+
+.read-receipt.read {
+  color: #4a9eff;
+  font-weight: 600;
+}
+
+.read-receipt:hover {
+  cursor: help;
+}
