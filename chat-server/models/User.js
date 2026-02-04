@@ -20,6 +20,31 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    bio: {
+      type: String,
+      default: "",
+      maxlength: 500,
+    },
+    isOnline: {
+      type: Boolean,
+      default: false,
+    },
+    lastSeen: {
+      type: Date,
+      default: Date.now,
+    },
+    lastActivity: {
+      type: Date,
+      default: Date.now,
+    },
+    messageCount: {
+      type: Number,
+      default: 0,
+    },
+    chatCount: {
+      type: Number,
+      default: 0,
+    },
   },
   { timestamps: true }
 );

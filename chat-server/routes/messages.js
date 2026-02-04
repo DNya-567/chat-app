@@ -13,7 +13,9 @@ router.get("/:chatId", async (req, res) => {
 
     const msgs = await Message.find({ chatId })
       .sort({ createdAt: 1 })
-      .populate("sender", "_id username");
+      .populate("sender", "_id username")
+      .populate("readReceipts.userId", "_id username")
+      .populate({ path: "replyTo", populate: { path: "sender", select: "_id username" } });
 
     return res.json(msgs);
   } catch (err) {

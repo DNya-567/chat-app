@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { initSocket, destroySocket } from "../services/socket";
 import { normaliseUser } from "../services/normaliseUser";
+import API_BASE_URL from "../services/api";
 
 const AuthContext = createContext();
 
@@ -26,6 +27,23 @@ export const AuthProvider = ({ children }) => {
       }
     }
     setLoading(false);
+  }, []);
+
+  /* ---------- Warm up backend (Render cold start) ---------- */
+  useEffect(() => {
+    const ctrl = new AbortController();
+    const timeout = setTimeout(() => ctrl.abort(), 4000);
+
+    fetch(`${API_BASE_URL}/health`, { signal: ctrl.signal })
+      .catch(() => {
+        // ignore warm-up failures
+      })
+      .finally(() => clearTimeout(timeout));
+
+    return () => {
+      clearTimeout(timeout);
+      ctrl.abort();
+    };
   }, []);
 
   /* ---------- Init socket (once per auth) ---------- */

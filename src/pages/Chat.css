@@ -53,10 +53,82 @@
 }
 
 .chat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   padding: 14px 18px;
   border-bottom: 1px solid var(--border);
   background: var(--bg-surface);
   font-weight: 600;
+}
+
+.chat-title {
+  flex: 1;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.clickable-username {
+  background: transparent;
+  border: none;
+  color: var(--accent);
+  cursor: pointer;
+  font-size: inherit;
+  font-weight: 700;
+  font-family: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 2px;
+  transition: all 0.2s ease;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.clickable-username:hover {
+  background: rgba(99, 102, 241, 0.1);
+  text-decoration-color: var(--accent-soft, #818cf8);
+  transform: translateY(-1px);
+}
+
+.clickable-username:active {
+  transform: translateY(0);
+}
+
+.chat-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chat-action-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 6px;
+  font-size: 16px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 36px;
+}
+
+.chat-action-btn:hover {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+
+.search-btn.active {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
 }
 
 .chat-messages {
@@ -103,7 +175,7 @@
 
 .message-bubble:hover {
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
-  transform: translateY(-2px);
+  transform: none;
 }
 
 .message-bubble.mine {
@@ -483,5 +555,126 @@
     var(--accent),
     var(--accent-soft)
   );
+}
+
+/* ====== Pinned Messages Section ====== */
+.pinned-messages-section {
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 16px;
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+.pinned-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.pinned-icon {
+  font-size: 14px;
+}
+
+.pinned-title {
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.pinned-messages-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pinned-message-item {
+  background: var(--bg-card);
+  padding: 10px 14px;
+  border-radius: 8px;
+  border-left: 3px solid var(--accent);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.pinned-message-item:hover {
+  background: var(--hover);
+  transform: translateX(4px);
+}
+
+.pinned-message-text {
+  font-size: 13px;
+  color: var(--text-primary);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pinned-message-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.edited-badge {
+  font-size: 11px;
+  color: var(--text-muted);
+  background: rgba(255, 255, 255, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+/* ====== Editing Preview ====== */
+.editing-preview {
+  border-left-color: #f59e0b !important;
+  background: rgba(245, 158, 11, 0.1) !important;
+}
+
+.editing-preview .reply-label {
+  color: #f59e0b !important;
+}
+
+/* ====== Message Pinned Indicator ====== */
+.message-bubble.pinned {
+  border: 1px solid var(--accent);
+  position: relative;
+}
+
+.message-pinned-badge {
+  font-size: 11px;
+  color: var(--accent);
+  background: rgba(99, 102, 241, 0.15);
+  padding: 3px 8px;
+  border-radius: 4px;
+  margin-bottom: 6px;
+  font-weight: 500;
+  display: inline-block;
+}
+
+/* ====== Edited Message Indicator ====== */
+.message-edited-indicator {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-style: italic;
+  margin-top: 4px;
+}
+
+/* ====== Pin/Edit Action Buttons ====== */
+.pin-action:hover {
+  background: rgba(99, 102, 241, 0.2) !important;
+  color: var(--accent);
+}
+
+.edit-action:hover {
+  background: rgba(245, 158, 11, 0.2) !important;
+  color: #f59e0b;
 }
 

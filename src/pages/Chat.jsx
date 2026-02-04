@@ -1,12 +1,16 @@
 import { useEffect, useRef, useState } from "react";
 import { getSocket, whenConnected } from "../services/socket";
 import { useAuth } from "../context/AuthContext";
+import notificationService from "../services/notificationService";
 import IconNavbar from "../components/layout/IconNavbar";
 import MiddlePanel from "../components/layout/MiddlePanel";
 import ProfilePanel from "../components/profile/ProfilePanel";
 import SettingsModal from "../components/settings/SettingsModal";
 import MessageActions from "../components/chat/MessageActions";
+import MessageSearch from "../components/chat/MessageSearch";
 import ReplyPreview from "../components/chat/ReplyPreview";
+import ReadReceipts from "../components/chat/ReadReceipts";
+import UserProfileModal from "../components/user/UserProfileModal";
 import "./Chat.css";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
@@ -19,6 +23,16 @@ export default function Chat() {
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState("");
   const [replyingTo, setReplyingTo] = useState(null);
+  const [editingMessage, setEditingMessage] = useState(null);
+
+  // Search states
+  const [showSearch, setShowSearch] = useState(false);
+  const [highlightedMessageId, setHighlightedMessageId] = useState(null);
+  const [currentSearchQuery, setCurrentSearchQuery] = useState("");
+
+  // User profile modal state
+  const [showUserProfile, setShowUserProfile] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
 
   const [searchId, setSearchId] = useState("");
   const [searchError, setSearchError] = useState("");
@@ -46,6 +60,11 @@ export default function Chat() {
 
     socketRef.current = sock;
     console.log("✅ Chat.jsx socket available");
+
+    // Request notification permission
+    notificationService.requestPermission().then((permission) => {
+      console.log("🔔 Notification permission:", permission);
+    });
   }, [socketReady]);
 
   /* -------------------- SOCKET LISTENERS -------------------- */
@@ -168,11 +187,26 @@ export default function Chat() {
       });
     };
 
+    const onChatReadReceiptsUpdated = (data) => {
+      const { chatId, messages: updatedMessages } = data;
+      const activeId = activeChat ? String(activeChat._id) : null;
+
+      if (String(chatId) !== String(activeId)) {
+        console.log('⛔ Ignoring read receipts for different chat');
+        return;
+      }
+
+      console.log("[socket] chat_read_receipts_updated:", updatedMessages.length, "messages");
+      setMessages(updatedMessages);
+    };
+
     const onNewChat = (chat) => {
-      console.log("[socket] new_chat:", chat._id);
+      console.log("[socket] new_chat:", chat._id, chat);
       setChats((prev) => {
-        if (prev.some((c) => c._id === chat._id)) return prev;
-        return [chat, ...prev];
+        // If chat already exists, remove it from current position
+        const filtered = prev.filter((c) => String(c._id) !== String(chat._id));
+        // Add it at the beginning (top)
+        return [chat, ...filtered];
       });
     };
 
@@ -181,17 +215,45 @@ export default function Chat() {
       // Optionally show UI notification here
     };
 
+    // Handler for push notifications from any chat
+    const onNewMessageNotification = (data) => {
+      const { message, chat } = data;
+      const senderId = typeof message.sender === 'object' ? message.sender._id : message.sender;
+      const senderName = typeof message.sender === 'object' ? message.sender.username : 'Someone';
+
+      console.log('[socket] new_message_notification', message._id, 'from', senderName);
+
+      // Don't show notification for own messages
+      if (String(senderId) === String(user._id)) {
+        return;
+      }
+
+      // Show notification
+      notificationService.showMessageNotification(
+        message,
+        { username: senderName, avatar: message.sender?.avatar },
+        () => {
+          // On click, could navigate to that chat
+          console.log("🔔 Notification clicked, opening chat:", chat._id);
+        }
+      );
+    };
+
     sock.on("chat_messages", onChatMessages);
     sock.on("receive_message", (m) => { console.log('[socket] receive_message', m._id); onReceiveMessage(m); });
     sock.on("message_updated", onMessageUpdated);
+    sock.on("chat_read_receipts_updated", onChatReadReceiptsUpdated);
     sock.on("new_chat", onNewChat);
+    sock.on("new_message_notification", onNewMessageNotification);
     sock.on("error_message", onErrorMessage);
 
     return () => {
       sock.off("chat_messages", onChatMessages);
       sock.off("receive_message", onReceiveMessage);
       sock.off("message_updated", onMessageUpdated);
+      sock.off("chat_read_receipts_updated", onChatReadReceiptsUpdated);
       sock.off("new_chat", onNewChat);
+      sock.off("new_message_notification", onNewMessageNotification);
       sock.off("error_message", onErrorMessage);
     };
   }, [socketReady, activeChat]);
@@ -239,6 +301,9 @@ export default function Chat() {
 
     console.log("📨 openChat: loading messages");
     sock.emit("load_messages", { chatId: chat._id });
+
+    // Mark all messages as read when opening the chat
+    sock.emit("mark_chat_as_read", { chatId: chat._id, userId: user._id });
 
     // Fallback: also fetch via HTTP in case socket messages are missed or arrive before activeChat is set
     try {
@@ -302,6 +367,12 @@ export default function Chat() {
     const sock = socketRef.current;
     if (!sock) return;
 
+    // If editing, save the edit instead
+    if (editingMessage) {
+      saveEditMessage();
+      return;
+    }
+
     const payload = {
       chatId: activeChat._id,
       senderId: user._id,
@@ -322,6 +393,8 @@ export default function Chat() {
         createdAt: new Date().toISOString(),
         reactions: [],
         deleted: false,
+        pinned: false,
+        edited: false,
         replyTo: replyingTo ? { _id: replyingTo._id, text: replyingTo.text, sender: { _id: replyingTo.senderId, username: replyingTo.senderName } } : null,
       },
     ]);
@@ -358,6 +431,62 @@ export default function Chat() {
     });
   };
 
+  const pinMessage = (messageId) => {
+    if (messageId.startsWith("tmp-")) {
+      console.log('⛔ Cannot pin temporary message');
+      return;
+    }
+
+    if (!activeChat) {
+      console.log('⛔ No active chat');
+      return;
+    }
+
+    console.log("[pin_message] emitting:", { messageId, userId: user._id, chatId: activeChat._id });
+    socketRef.current?.emit("pin_message", {
+      messageId,
+      userId: user._id,
+      chatId: activeChat._id,
+    });
+  };
+
+  const startEditMessage = (msg) => {
+    if (!msg || msg.deleted) return;
+
+    setEditingMessage(msg);
+    setMessage(msg.text);
+    setReplyingTo(null); // Clear reply when editing
+  };
+
+  const cancelEdit = () => {
+    setEditingMessage(null);
+    setMessage("");
+  };
+
+  const saveEditMessage = () => {
+    if (!editingMessage || !message.trim()) return;
+
+    if (message.trim() === editingMessage.text) {
+      // No changes, just cancel
+      cancelEdit();
+      return;
+    }
+
+    console.log("[edit_message] emitting:", {
+      messageId: editingMessage._id,
+      userId: user._id,
+      newText: message.trim()
+    });
+
+    socketRef.current?.emit("edit_message", {
+      messageId: editingMessage._id,
+      userId: user._id,
+      newText: message.trim(),
+    });
+
+    cancelEdit();
+  };
+
   /* -------------------- HELPERS -------------------- */
   const getOtherUser = (chat) =>
     chat.participants?.find((p) => p._id !== user._id);
@@ -370,6 +499,81 @@ export default function Chat() {
       hour: "2-digit",
       minute: "2-digit",
     });
+
+  const handleMessageFound = (messageId) => {
+    // Find the message element and scroll to it
+    const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
+    if (messageElement) {
+      messageElement.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+
+      // Highlight the message temporarily
+      setHighlightedMessageId(messageId);
+
+      // Remove highlight after 2 seconds
+      setTimeout(() => {
+        setHighlightedMessageId(null);
+      }, 2000);
+    }
+  };
+
+  const highlightSearchMatches = (text, query) => {
+    if (!query) return text;
+
+    const regex = new RegExp(`(${query})`, 'gi');
+    const parts = text.split(regex);
+
+    return parts.map((part, index) =>
+      regex.test(part) ?
+        <span key={index} className="search-match">{part}</span> :
+        part
+    );
+  };
+
+  const handleOpenUserProfile = async (user) => {
+    if (!user?._id) return;
+
+    try {
+      console.log(`📊 Fetching profile for user: ${user.username} (${user._id})`);
+
+      // Fetch detailed user profile from API
+      const response = await fetch(`${API_URL}/api/users/profile/${user._id}`);
+      if (response.ok) {
+        const userProfile = await response.json();
+        console.log(`📊 Profile data received:`, userProfile);
+        setSelectedUser(userProfile);
+        setShowUserProfile(true);
+      } else {
+        console.error("Failed to fetch user profile:", response.status);
+        // Use basic user data as fallback
+        setSelectedUser({
+          ...user,
+          isOnline: false,
+          messageCount: 0,
+          chatCount: 0,
+          friendCount: 0,
+          lastSeen: new Date(),
+          bio: "Profile unavailable",
+        });
+        setShowUserProfile(true);
+      }
+    } catch (error) {
+      console.error("Error fetching user profile:", error);
+      // Fallback to basic data on network error
+      setSelectedUser({
+        ...user,
+        isOnline: false,
+        messageCount: 0,
+        chatCount: 0,
+        friendCount: 0,
+        lastSeen: new Date(),
+        bio: "Unable to load profile",
+      });
+      setShowUserProfile(true);
+    }
+  };
 
   /* -------------------- AUTO SCROLL -------------------- */
   useEffect(() => {
@@ -413,8 +617,65 @@ export default function Chat() {
         ) : (
           <>
             <div className="chat-header">
-              Chat with {getOtherUser(activeChat)?.username}
+              <span className="chat-title">
+                Chat with{" "}
+                <button
+                  className="clickable-username"
+                  onClick={() => handleOpenUserProfile(getOtherUser(activeChat))}
+                  title="View user profile"
+                >
+                  {getOtherUser(activeChat)?.username}
+                </button>
+              </span>
+              <div className="chat-header-actions">
+                <button
+                  className={`chat-action-btn search-btn ${showSearch ? "active" : ""}`}
+                  onClick={() => setShowSearch(!showSearch)}
+                  title="Search messages"
+                >
+                  🔍
+                </button>
+              </div>
             </div>
+
+            {/* Message Search */}
+            <MessageSearch
+              messages={messages}
+              onMessageFound={handleMessageFound}
+              onSearchQueryChange={setCurrentSearchQuery}
+              isVisible={showSearch}
+              onClose={() => {
+                setShowSearch(false);
+                setCurrentSearchQuery("");
+                setHighlightedMessageId(null);
+              }}
+            />
+
+            {/* Pinned Messages Section */}
+            {messages.filter((m) => m.pinned).length > 0 && (
+              <div className="pinned-messages-section">
+                <div className="pinned-header">
+                  <span className="pinned-icon">📌</span>
+                  <span className="pinned-title">Pinned Messages</span>
+                </div>
+                <div className="pinned-messages-list">
+                  {messages
+                    .filter((m) => m.pinned)
+                    .map((msg) => (
+                      <div key={msg._id} className="pinned-message-item">
+                        <div className="pinned-message-text">
+                          {msg.text.length > 50
+                            ? msg.text.substring(0, 50) + "..."
+                            : msg.text}
+                        </div>
+                        <div className="pinned-message-info">
+                          {msg.edited && <span className="edited-badge">✏️ edited</span>}
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            )}
 
             <div className="chat-messages">
               {messages.map((msg) => {
@@ -427,9 +688,15 @@ export default function Chat() {
                   <div
                     key={msg._id}
                     className={`message-row ${mine ? "mine" : ""}`}
+                    data-message-id={msg._id}
                   >
-                    <div className={`message-bubble ${mine ? "mine" : "other"}`}>
+                    <div className={`message-bubble ${mine ? "mine" : "other"} ${msg.pinned ? "pinned" : ""} ${highlightedMessageId === msg._id ? "search-highlight" : ""}`}>
                       <div className="message-content">
+                        {/* Pinned indicator */}
+                        {msg.pinned && (
+                          <div className="message-pinned-badge">📌 Pinned</div>
+                        )}
+
                         {msg.replyTo && (
                           <>
                             <div className="message-reply-preview">
@@ -441,12 +708,22 @@ export default function Chat() {
                         )}
 
                         <div className="message-text">
-                          {msg.deleted ? <i>{msg.text}</i> : msg.text}
+                          {msg.deleted ? (
+                            <i>{msg.text}</i>
+                          ) : (
+                            highlightSearchMatches(msg.text, currentSearchQuery)
+                          )}
                         </div>
 
                         <div className="message-time">
                           {formatTime(msg.createdAt)}
+                          {msg.edited && <span className="message-edited-indicator"> (edited)</span>}
                         </div>
+
+                        {/* Show read receipts only for own messages */}
+                        {mine && (
+                          <ReadReceipts readReceipts={msg.readReceipts} userId={getOtherUser(activeChat)?._id} />
+                        )}
 
                         {msg.reactions?.length > 0 && (
                           <div className="reactions">
@@ -472,6 +749,8 @@ export default function Chat() {
                           onReact={(msgId, emoji) =>
                             reactToMessage(msgId, emoji)
                           }
+                          onPin={(msgId) => pinMessage(msgId)}
+                          onEdit={(msg) => startEditMessage(msg)}
                           isOwn={mine}
                         />
                       )}
@@ -487,16 +766,35 @@ export default function Chat() {
               onClear={() => setReplyingTo(null)}
             />
 
+            {/* Edit Preview */}
+            {editingMessage && (
+              <div className="reply-preview editing-preview">
+                <div className="reply-preview-header">
+                  <span className="reply-label">✏️ Editing message</span>
+                  <button
+                    className="reply-close-btn"
+                    onClick={cancelEdit}
+                    title="Cancel edit"
+                  >
+                    ✕
+                  </button>
+                </div>
+                <div className="reply-preview-content">
+                  <div className="reply-text">{editingMessage.text}</div>
+                </div>
+              </div>
+            )}
+
             <div className="chat-input-bar">
               <input
                 className="chat-input"
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-                placeholder="Type a message..."
+                placeholder={editingMessage ? "Edit your message..." : "Type a message..."}
               />
               <button className="chat-send-btn" onClick={sendMessage}>
-                Send
+                {editingMessage ? "Save" : "Send"}
               </button>
             </div>
           </>
@@ -504,10 +802,20 @@ export default function Chat() {
           </div>
         </>
       )}
-
+      {/* Settings Modal */}
       {showSettings && (
         <SettingsModal onClose={() => setShowSettings(false)} />
       )}
+
+      {/* User Profile Modal */}
+      <UserProfileModal
+        user={selectedUser}
+        isOpen={showUserProfile}
+        onClose={() => {
+          setShowUserProfile(false);
+          setSelectedUser(null);
+        }}
+      />
     </div>
   );
 }

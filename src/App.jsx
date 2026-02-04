@@ -2,7 +2,7 @@ import { useState } from "react";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Chat from "./pages/Chat";
-import { AuthProvider, useAuth } from "./context/AuthContext";
+import { useAuth } from "./context/AuthContext";
 
 function ProtectedApp() {
   const { isAuthenticated } = useAuth();
@@ -21,9 +21,7 @@ function ProtectedApp() {
 
 function App() {
   return (
-    <AuthProvider>
-      <ProtectedApp />
-    </AuthProvider>
+    <ProtectedApp />
   );
 }
 
