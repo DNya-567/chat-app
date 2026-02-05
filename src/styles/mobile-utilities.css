@@ -1,0 +1,135 @@
+/* Mobile Responsive Utilities */
+
+/* ====== Responsive Utilities ====== */
+.mobile-only {
+  display: none;
+}
+
+.desktop-only {
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .mobile-only {
+    display: block;
+  }
+
+  .desktop-only {
+    display: none;
+  }
+
+  .mobile-hidden {
+    display: none !important;
+  }
+
+  .mobile-full-width {
+    width: 100% !important;
+  }
+
+  .mobile-center {
+    text-align: center !important;
+  }
+}
+
+/* ====== Touch-Friendly Classes ====== */
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.no-tap-highlight {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.smooth-scroll {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+/* ====== Mobile Typography ====== */
+@media (max-width: 768px) {
+  .mobile-text-sm {
+    font-size: 14px !important;
+  }
+
+  .mobile-text-base {
+    font-size: 16px !important;
+  }
+
+  .mobile-text-lg {
+    font-size: 18px !important;
+  }
+}
+
+/* ====== Mobile Spacing ====== */
+@media (max-width: 768px) {
+  .mobile-p-sm {
+    padding: 8px !important;
+  }
+
+  .mobile-p-md {
+    padding: 16px !important;
+  }
+
+  .mobile-p-lg {
+    padding: 24px !important;
+  }
+
+  .mobile-m-sm {
+    margin: 8px !important;
+  }
+
+  .mobile-m-md {
+    margin: 16px !important;
+  }
+
+  .mobile-m-lg {
+    margin: 24px !important;
+  }
+}
+
+/* ====== Mobile Flexbox ====== */
+@media (max-width: 768px) {
+  .mobile-flex-col {
+    flex-direction: column !important;
+  }
+
+  .mobile-flex-row {
+    flex-direction: row !important;
+  }
+
+  .mobile-justify-center {
+    justify-content: center !important;
+  }
+
+  .mobile-items-center {
+    align-items: center !important;
+  }
+}
+
+/* ====== Safe Area Support (for notched devices) ====== */
+@supports (padding-top: env(safe-area-inset-top)) {
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .safe-area-left {
+    padding-left: env(safe-area-inset-left);
+  }
+
+  .safe-area-right {
+    padding-right: env(safe-area-inset-right);
+  }
+}

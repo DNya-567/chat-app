@@ -16,6 +16,10 @@
   transition: all 0.2s ease;
   opacity: 0;
   margin-left: 8px;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
 .message-bubble:hover .message-actions-btn {
@@ -32,6 +36,42 @@
   color: var(--accent);
   background-color: var(--hover);
   transform: scale(1.1);
+}
+
+.message-actions-btn:active {
+  transform: scale(0.95);
+}
+
+/* Mobile: Always show 3-dot button */
+@media (max-width: 768px) {
+  .message-actions-btn {
+    opacity: 1 !important;
+    background-color: var(--bg-input);
+    border: 1px solid var(--border);
+    padding: 8px 10px;
+    font-size: 18px;
+    min-width: 36px;
+    min-height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+  }
+
+  .message-actions-btn:hover {
+    background-color: var(--hover);
+    border-color: var(--accent);
+  }
+}
+
+@media (max-width: 480px) {
+  .message-actions-btn {
+    padding: 6px 8px;
+    font-size: 16px;
+    min-width: 32px;
+    min-height: 32px;
+    border-radius: 6px;
+  }
 }
 
 .message-actions-menu {

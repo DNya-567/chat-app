@@ -1,11 +1,102 @@
+/* COMPREHENSIVE DESKTOP SCROLL RESET - Maximum Specificity */
+@media (min-width: 769px) {
+  /* Reset all possible scroll-causing properties */
+  body .chat-container .profile-panel,
+  body div.chat-container div.profile-panel,
+  .chat-container .profile-panel.navbar-expanded,
+  .chat-container .profile-panel:not(.mobile),
+  html body .chat-container .profile-panel {
+    overflow: hidden !important;
+    overflow-y: hidden !important;
+    overflow-x: hidden !important;
+    max-height: 100vh !important;
+    height: 100vh !important;
+    position: relative !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  /* Ensure content area is the ONLY scrollable element */
+  body .chat-container .profile-panel .profile-content,
+  body div.chat-container div.profile-panel div.profile-content,
+  .chat-container .profile-panel.navbar-expanded .profile-content,
+  html body .chat-container .profile-panel .profile-content {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    flex: 1 1 0% !important;
+    min-height: 0 !important;
+    max-height: calc(100vh - 72px) !important;
+    position: relative !important;
+  }
+
+  /* Force all other children to be non-scrollable */
+  body .chat-container .profile-panel > *:not(.profile-content),
+  body div.chat-container div.profile-panel > *:not(.profile-content) {
+    overflow: visible !important;
+    flex-shrink: 0 !important;
+  }
+}
+
 .profile-panel {
   width: 100%;
   height: 100vh;
   background: linear-gradient(135deg, var(--bg-main) 0%, var(--bg-sidebar) 100%);
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
+  overflow: hidden !important; /* CRITICAL: Prevent any scrolling on main container */
   animation: fadeIn 0.3s ease-out;
+  position: relative;
+}
+
+/* DESKTOP: Absolute prevention of double scrolling */
+@media (min-width: 769px) {
+  .profile-panel {
+    overflow: hidden !important;
+    height: 100vh !important;
+    position: relative !important;
+  }
+
+  .profile-panel * {
+    /* Prevent any child from creating scroll context except profile-content */
+    overflow: visible;
+  }
+
+  .profile-panel .profile-content {
+    /* Only this element is allowed to scroll */
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .profile-panel {
+    position: absolute;
+    left: 60px;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: calc(100vw - 60px);
+    z-index: 100;
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-panel {
+    position: fixed;
+    left: 0; /* Full width when navbar is collapsed */
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 100vw;
+    z-index: 1000;
+    box-shadow: -2px 0 8px rgba(0, 0, 0, 0.2);
+  }
+
+  /* When navbar is expanded */
+  .navbar-expanded .profile-panel {
+    left: 55px;
+    width: calc(100vw - 55px);
+  }
 }
 
 .profile-header {
@@ -17,8 +108,48 @@
   background: linear-gradient(135deg, var(--bg-surface) 0%, var(--bg-input) 100%);
   position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: 100;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  flex-shrink: 0;
+  min-height: 72px; /* Fixed height for consistent calculations */
+}
+
+/* Desktop profile header optimization */
+@media (min-width: 769px) {
+  .profile-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--border);
+    height: 72px; /* Fixed height for desktop */
+    min-height: 72px;
+    max-height: 72px;
+    overflow: hidden;
+  }
+}
+
+/* Mobile responsive profile header */
+@media (max-width: 768px) {
+  .profile-header {
+    padding: 16px 20px;
+    position: sticky;
+    top: 0;
+    left: 0;
+    right: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-header {
+    padding: 14px 16px;
+    position: sticky;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(135deg, var(--bg-surface) 0%, var(--bg-input) 100%);
+    border-bottom: 1px solid var(--border);
+  }
 }
 
 .profile-back-btn {
@@ -30,11 +161,41 @@
   padding: 10px 14px;
   border-radius: 8px;
   transition: all 0.2s ease;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
 .profile-back-btn:hover {
   background-color: var(--hover);
   transform: translateX(-2px);
+}
+
+.profile-back-btn:active {
+  transform: translateX(0) scale(0.95);
+}
+
+/* Mobile responsive back button */
+@media (max-width: 768px) {
+  .profile-back-btn {
+    padding: 12px 16px;
+    font-size: 18px;
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-back-btn {
+    padding: 10px 14px;
+    font-size: 16px;
+    min-width: 40px;
+    min-height: 40px;
+  }
 }
 
 .profile-title {
@@ -46,12 +207,44 @@
 }
 
 .profile-content {
-  flex: 1;
+  flex: 1 1 0%; /* Explicit flex values for better control */
   padding: 32px 24px;
   display: flex;
   flex-direction: column;
-  gap: 28px;
-  overflow-y: auto;
+  gap: 32px;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  -webkit-overflow-scrolling: touch;
+  min-height: 0 !important; /* Critical for flex scrolling */
+  max-height: calc(100vh - 80px); /* Explicit height constraint */
+  position: relative;
+}
+
+/* Desktop-specific scroll optimization */
+@media (min-width: 769px) {
+  .profile-content {
+    max-height: calc(100vh - 72px) !important; /* Account for header height */
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(99, 102, 241, 0.3) transparent;
+  }
+}
+
+/* Mobile responsive profile content */
+@media (max-width: 768px) {
+  .profile-content {
+    padding: 24px 20px;
+    gap: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-content {
+    padding: 20px 16px;
+    gap: 20px;
+    padding-bottom: 32px; /* Extra bottom padding for mobile */
+  }
 }
 
 .profile-avatar-section {
@@ -66,14 +259,79 @@
   text-align: center;
 }
 
-.profile-avatar {
+/* Mobile responsive avatar section */
+@media (max-width: 768px) {
+  .profile-avatar-section {
+    padding: 24px;
+    gap: 14px;
+    border-radius: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-avatar-section {
+    padding: 20px 16px;
+    gap: 12px;
+    border-radius: 12px;
+    margin: 0 -2px; /* Slight negative margin to use more width */
+  }
+}
+
+.profile-avatar-wrapper {
   width: 140px;
   height: 140px;
   border-radius: 50%;
-  object-fit: cover;
+  overflow: hidden;
   border: 5px solid var(--accent);
   box-shadow: 0 0 0 3px var(--bg-surface), 0 8px 24px rgba(99, 102, 241, 0.4);
   animation: popIn 0.4s ease-out;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.profile-avatar {
+  width: 100%;
+  height: 100%;
+  border-radius: 50% !important; /* Force circular shape */
+  object-fit: cover;
+  object-position: center;
+  border: none; /* Remove border from img, wrapper handles it */
+  box-shadow: none; /* Remove shadow from img, wrapper handles it */
+  animation: none; /* Remove animation from img, wrapper handles it */
+  display: block;
+  aspect-ratio: 1 / 1; /* Ensure perfect square container for circle */
+}
+
+/* Mobile responsive avatar wrapper and image */
+@media (max-width: 768px) {
+  .profile-avatar-wrapper {
+    width: 120px;
+    height: 120px;
+    border-width: 4px;
+  }
+
+  .profile-avatar {
+    width: 100%;
+    height: 100%;
+    border-radius: 50% !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-avatar-wrapper {
+    width: 100px;
+    height: 100px;
+    border-width: 3px;
+    box-shadow: 0 0 0 2px var(--bg-surface), 0 6px 16px rgba(99, 102, 241, 0.3);
+  }
+
+  .profile-avatar {
+    width: 100%;
+    height: 100%;
+    border-radius: 50% !important;
+  }
 }
 
 .profile-username {
@@ -84,6 +342,20 @@
   letter-spacing: -0.5px;
 }
 
+/* Mobile responsive username */
+@media (max-width: 768px) {
+  .profile-username {
+    font-size: 22px;
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-username {
+    font-size: 20px;
+    letter-spacing: -0.3px;
+  }
+}
+
 .profile-status {
   font-size: 14px;
   color: #10b981;
@@ -91,10 +363,31 @@
   font-weight: 600;
 }
 
+/* Mobile responsive status */
+@media (max-width: 480px) {
+  .profile-status {
+    font-size: 13px;
+  }
+}
+
 .profile-info-section {
   display: grid;
   grid-template-columns: 1fr;
   gap: 14px;
+}
+
+/* Mobile responsive info section */
+@media (max-width: 768px) {
+  .profile-info-section {
+    gap: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-info-section {
+    gap: 10px;
+    margin: 0 -2px; /* Use more width on mobile */
+  }
 }
 
 .profile-info-item {
@@ -104,6 +397,10 @@
   border-radius: 12px;
   transition: all 0.3s ease;
   cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
 .profile-info-item:hover {
@@ -111,6 +408,34 @@
   background: linear-gradient(135deg, var(--bg-input) 0%, var(--hover) 100%);
   transform: translateX(4px);
   box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+}
+
+.profile-info-item:active {
+  transform: translateX(2px) scale(0.98);
+}
+
+/* Mobile responsive info items */
+@media (max-width: 768px) {
+  .profile-info-item {
+    padding: 16px 18px;
+    border-radius: 10px;
+  }
+
+  .profile-info-item:hover {
+    transform: translateX(2px);
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-info-item {
+    padding: 14px 16px;
+    border-radius: 10px;
+    border-width: 1px;
+  }
+
+  .profile-info-item:hover {
+    transform: translateX(1px);
+  }
 }
 
 .profile-info-label {
@@ -271,6 +596,28 @@
   }
 }
 
+/* DEFINITIVE SCROLLBAR CONTROL - Desktop Only */
+@media (min-width: 769px) {
+  /* Hide all scrollbars except profile-content */
+  .profile-panel,
+  .profile-panel *:not(.profile-content) {
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
+
+  .profile-panel::-webkit-scrollbar,
+  .profile-panel *:not(.profile-content)::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+  }
+
+  /* Only profile-content gets scrollbar */
+  .profile-content {
+    scrollbar-width: thin !important;
+    scrollbar-color: rgba(99, 102, 241, 0.3) transparent !important;
+  }
+}
+
 .profile-content::-webkit-scrollbar {
   width: 8px;
 }
@@ -282,8 +629,29 @@
 .profile-content::-webkit-scrollbar-thumb {
   background: var(--border);
   border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
 }
 
 .profile-content::-webkit-scrollbar-thumb:hover {
   background: var(--accent);
 }
+
+/* Desktop scrollbar improvements */
+@media (min-width: 769px) {
+  .profile-content::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .profile-content::-webkit-scrollbar-thumb {
+    background: rgba(99, 102, 241, 0.2);
+    border-radius: 3px;
+  }
+
+  .profile-content::-webkit-scrollbar-thumb:hover {
+    background: rgba(99, 102, 241, 0.4);
+  }
+}
+

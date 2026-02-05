@@ -3,11 +3,35 @@ import "./ProfilePanel.css";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
-export default function ProfilePanel({ user, onBack }) {
+export default function ProfilePanel({ user, onBack, isNavbarExpanded }) {
   const [copied, setCopied] = useState(false);
   const [chatCount, setChatCount] = useState(0);
   const [messageCount, setMessageCount] = useState(0);
   const [loading, setLoading] = useState(true);
+
+  // Enforce single scroll behavior on desktop
+  useEffect(() => {
+    const profilePanel = document.querySelector('.profile-panel');
+    const profileContent = document.querySelector('.profile-content');
+
+    if (window.innerWidth > 768 && profilePanel && profileContent) {
+      // Force scroll properties
+      profilePanel.style.overflow = 'hidden';
+      profilePanel.style.overflowY = 'hidden';
+      profilePanel.style.overflowX = 'hidden';
+
+      profileContent.style.overflowY = 'auto';
+      profileContent.style.overflowX = 'hidden';
+
+      // Prevent any other scrollable elements
+      const allChildren = profilePanel.querySelectorAll('*:not(.profile-content)');
+      allChildren.forEach(child => {
+        if (child !== profileContent) {
+          child.style.overflow = 'visible';
+        }
+      });
+    }
+  }, []);
 
   // Fetch chat and message counts
   useEffect(() => {
@@ -86,7 +110,7 @@ export default function ProfilePanel({ user, onBack }) {
   };
 
   return (
-    <div className="profile-panel">
+    <div className={`profile-panel ${isNavbarExpanded ? 'navbar-expanded' : ''}`}>
       <div className="profile-header">
         <button className="profile-back-btn" onClick={onBack}>
           ← Back
@@ -97,7 +121,9 @@ export default function ProfilePanel({ user, onBack }) {
       <div className="profile-content">
         {/* Avatar Section */}
         <div className="profile-avatar-section">
-          <img src={getAvatarUrl()} alt="profile" className="profile-avatar" />
+          <div className="profile-avatar-wrapper">
+            <img src={getAvatarUrl()} alt="profile" className="profile-avatar" />
+          </div>
           <h3 className="profile-username">{user.username}</h3>
           <p className="profile-status">🟢 Active Now</p>
         </div>

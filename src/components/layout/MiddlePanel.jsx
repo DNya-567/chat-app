@@ -11,6 +11,11 @@ export default function MiddlePanel({
   onStartChat,
   user,
   getOtherUser,
+  onCloseSettings,
+  // Toggle button props
+  isMobile,
+  isNavbarCollapsed,
+  onToggleNavbar,
 }) {
   if (activePanel === "settings" || activePanel === "profile") {
     return null;
@@ -19,6 +24,17 @@ export default function MiddlePanel({
   return (
     <div className="middle-panel">
       <div className="middle-header">
+        {/* Mobile toggle button - subtle and integrated */}
+        {isMobile && (
+          <button
+            className="middle-nav-toggle"
+            onClick={onToggleNavbar}
+            title={isNavbarCollapsed ? "Show navigation" : "Hide navigation"}
+          >
+            {isNavbarCollapsed ? "☰" : "✕"}
+          </button>
+        )}
+
         <h2 className="middle-title">
           {activePanel === "chats" ? "💬 Your Chats" : "Conversations"}
         </h2>
@@ -31,7 +47,16 @@ export default function MiddlePanel({
           value={searchId}
           onChange={(e) => setSearchId(e.target.value)}
         />
-        <button className="middle-start-btn" onClick={onStartChat}>
+        <button
+          className="middle-start-btn"
+          onClick={() => {
+            onStartChat();
+            // Close settings when starting a new chat
+            if (onCloseSettings) {
+              onCloseSettings();
+            }
+          }}
+        >
           + Start Chat
         </button>
       </div>
@@ -54,7 +79,13 @@ export default function MiddlePanel({
               <div
                 key={chat._id}
                 className={`middle-chat-item ${isActive ? "active" : ""}`}
-                onClick={() => setActiveChat(chat)}
+                onClick={() => {
+                  setActiveChat(chat);
+                  // Close settings when selecting a chat
+                  if (onCloseSettings) {
+                    onCloseSettings();
+                  }
+                }}
               >
                 <img src={avatar} alt="avatar" className="middle-chat-avatar" />
                 <div className="middle-chat-info">
