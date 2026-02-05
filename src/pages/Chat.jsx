@@ -39,10 +39,37 @@ export default function Chat() {
   const [activePanel, setActivePanel] = useState("chats");
   const [showSettings, setShowSettings] = useState(false);
 
+  // Mobile responsive state
+  const [isMobile, setIsMobile] = useState(false);
+  const [isNavbarCollapsed, setIsNavbarCollapsed] = useState(false);
+
   const socketRef = useRef(null);
   const messagesEndRef = useRef(null);
   const joinedRooms = useRef(new Set());
   const requestedChatIdRef = useRef(null);
+
+  /* -------------------- MOBILE DETECTION -------------------- */
+  useEffect(() => {
+    const checkMobile = () => {
+      const mobile = window.innerWidth <= 768;
+      setIsMobile(mobile);
+      // Auto-collapse navbar on mobile
+      if (mobile) {
+        setIsNavbarCollapsed(true);
+      } else {
+        setIsNavbarCollapsed(false);
+      }
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  const toggleNavbarCollapse = () => {
+    setIsNavbarCollapsed(!isNavbarCollapsed);
+  };
 
   /* -------------------- SAFETY -------------------- */
   if (loading) return <div className="flex-center">Loading…</div>;
@@ -581,19 +608,43 @@ export default function Chat() {
   }, [messages]);
 
   /* -------------------- UI -------------------- */
+  const getChatContainerClasses = () => {
+    const classes = ["chat-container"];
+
+    if (isMobile) {
+      classes.push("mobile");
+      if (activeChat) {
+        classes.push("mobile-chat-active");
+      }
+      if (!isNavbarCollapsed) {
+        classes.push("navbar-expanded");
+      }
+    }
+
+    return classes.join(" ");
+  };
+
   return (
-    <div className="chat-container">
+    <div className={getChatContainerClasses()}>
       {/* ICON NAVBAR */}
       <IconNavbar
         activePanel={activePanel}
         setActivePanel={setActivePanel}
         onLogout={logout}
         onOpenSettings={() => setShowSettings(true)}
+        onCloseSettings={() => setShowSettings(false)}
+        isCollapsed={isNavbarCollapsed}
+        onToggleCollapse={toggleNavbarCollapse}
+        isMobile={isMobile}
       />
 
       {/* PROFILE PANEL - FULL WIDTH */}
       {activePanel === "profile" ? (
-        <ProfilePanel user={user} onBack={() => setActivePanel("chats")} />
+        <ProfilePanel
+          user={user}
+          onBack={() => setActivePanel("chats")}
+          isNavbarExpanded={!isNavbarCollapsed}
+        />
       ) : (
         <>
           {/* MIDDLE PANEL */}
@@ -608,15 +659,50 @@ export default function Chat() {
             onStartChat={startChatById}
             user={user}
             getOtherUser={getOtherUser}
+            onCloseSettings={() => setShowSettings(false)}
+            isMobile={isMobile}
+            isNavbarCollapsed={isNavbarCollapsed}
+            onToggleNavbar={toggleNavbarCollapse}
           />
 
           {/* CHAT MAIN AREA */}
-          <div className="chat-main">
+          <div
+            className="chat-main"
+            onClick={() => {
+              // Close settings when clicking in chat area
+              if (showSettings) {
+                setShowSettings(false);
+              }
+              // Close search if open
+              if (showSearch) {
+                setShowSearch(false);
+                setCurrentSearchQuery("");
+                setHighlightedMessageId(null);
+              }
+            }}
+          >
         {!activeChat ? (
           <div className="chat-messages flex-center">Select a chat</div>
         ) : (
           <>
             <div className="chat-header">
+              {/* Mobile back button - only show when navbar is expanded */}
+              {isMobile && !isNavbarCollapsed && (
+                <button
+                  className="chat-back-btn mobile-only"
+                  onClick={() => {
+                    setActiveChat(null);
+                    setActivePanel("chats");
+                    setShowSettings(false);
+                    // Collapse navbar when going back to chat list
+                    setIsNavbarCollapsed(true);
+                  }}
+                  title="Back to chats"
+                >
+                  ←
+                </button>
+              )}
+
               <span className="chat-title">
                 Chat with{" "}
                 <button
@@ -630,7 +716,10 @@ export default function Chat() {
               <div className="chat-header-actions">
                 <button
                   className={`chat-action-btn search-btn ${showSearch ? "active" : ""}`}
-                  onClick={() => setShowSearch(!showSearch)}
+                  onClick={() => {
+                    setShowSearch(!showSearch);
+                    setShowSettings(false); // Close settings if open
+                  }}
                   title="Search messages"
                 >
                   🔍
@@ -785,15 +874,25 @@ export default function Chat() {
               </div>
             )}
 
-            <div className="chat-input-bar">
+            <div
+              className="chat-input-bar"
+              onClick={(e) => e.stopPropagation()} // Prevent closing settings when typing
+            >
               <input
                 className="chat-input"
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && sendMessage()}
                 placeholder={editingMessage ? "Edit your message..." : "Type a message..."}
+                onClick={(e) => e.stopPropagation()} // Prevent event bubbling
               />
-              <button className="chat-send-btn" onClick={sendMessage}>
+              <button
+                className="chat-send-btn"
+                onClick={(e) => {
+                  e.stopPropagation(); // Prevent event bubbling
+                  sendMessage();
+                }}
+              >
                 {editingMessage ? "Save" : "Send"}
               </button>
             </div>
@@ -804,7 +903,10 @@ export default function Chat() {
       )}
       {/* Settings Modal */}
       {showSettings && (
-        <SettingsModal onClose={() => setShowSettings(false)} />
+        <SettingsModal
+          onClose={() => setShowSettings(false)}
+          isNavbarExpanded={!isNavbarCollapsed}
+        />
       )}
 
       {/* User Profile Modal */}

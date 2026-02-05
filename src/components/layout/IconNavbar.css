@@ -13,6 +13,37 @@
   overflow-y: auto;
   box-shadow: 1px 0 6px rgba(0, 0, 0, 0.1);
   animation: fadeIn 0.3s ease-out;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 100;
+  transition: transform 0.3s ease-in-out;
+}
+
+/* Mobile responsive navbar */
+@media (max-width: 768px) {
+  .icon-navbar {
+    width: 60px;
+    padding: 8px 0;
+    gap: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .icon-navbar {
+    width: 55px;
+    padding: 6px 0;
+    gap: 6px;
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 1000;
+    transform: translateX(0);
+  }
+
+  .icon-navbar.mobile-collapsed {
+    transform: translateX(-100%);
+  }
 }
 
 .icon-navbar-header {
@@ -74,6 +105,25 @@
   overflow: hidden;
   user-select: none;
   -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+/* Mobile responsive icon items */
+@media (max-width: 768px) {
+  .icon-item {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .icon-item {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+  }
 }
 
 .icon-item-background {
@@ -131,27 +181,41 @@
   position: relative;
 }
 
+/* Mobile responsive emoji */
+@media (max-width: 768px) {
+  .icon-emoji {
+    font-size: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .icon-emoji {
+    font-size: 22px;
+  }
+}
+
 .icon-item:hover .icon-emoji {
   transform: scale(1.2) rotate(12deg);
   filter: drop-shadow(0 0 6px rgba(99, 102, 241, 0.3));
 }
 
 .icon-item.active .icon-emoji {
-  transform: scale(1.15) rotate(8deg);
-  filter: drop-shadow(0 0 4px rgba(99, 102, 241, 0.3));
+  transform: scale(1.1);
+  filter: drop-shadow(0 0 8px rgba(99, 102, 241, 0.5));
 }
 
 .icon-item-indicator {
   position: absolute;
-  bottom: 2px;
-  right: 2px;
-  width: 5px;
-  height: 5px;
+  bottom: 3px;
+  right: 3px;
+  width: 8px;
+  height: 8px;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-soft) 100%);
   border-radius: 50%;
-  background-color: var(--accent);
   opacity: 0;
   transform: scale(0);
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
+  border: 1.5px solid var(--bg-input);
 }
 
 .icon-item.active .icon-item-indicator {
@@ -201,8 +265,50 @@
   justify-content: center;
   transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   margin-top: auto;
-  overflow: hidden;
   user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+/* Mobile responsive logout button */
+@media (max-width: 768px) {
+  .icon-logout-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .icon-logout-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+  }
+}
+
+.icon-logout-btn:hover {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  border-color: #ef4444;
+  color: white;
+  transform: translateY(-4px);
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2), 0 6px 16px rgba(239, 68, 68, 0.4);
+}
+
+.icon-logout-btn.pressed {
+  transform: scale(0.93);
+  box-shadow: 0 0 0 1.5px rgba(239, 68, 68, 0.3), 0 1px 4px rgba(0, 0, 0, 0.25),
+    inset 0 1px 4px rgba(0, 0, 0, 0.15);
+}
+
+.icon-logout-btn.pressed .icon-emoji {
+  transform: scale(0.93);
+}
+
+.icon-logout-btn:hover .icon-emoji {
+  transform: scale(1.2);
+  filter: drop-shadow(0 0 6px rgba(239, 68, 68, 0.5));
 }
 
 .icon-logout-background {
@@ -218,152 +324,45 @@
 }
 
 .icon-logout-btn:hover .icon-logout-background {
-  opacity: 0.15;
-}
-
-.icon-logout-btn:hover {
-  background: linear-gradient(135deg, #7f1d1d 0%, #5f0f0f 100%);
-  border-color: #ef4444;
-  transform: translateY(-4px);
-  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.1), 0 6px 16px rgba(239, 68, 68, 0.25);
-}
-
-.icon-logout-btn.pressed {
-  transform: scale(0.93);
-  box-shadow: 0 0 0 1.5px rgba(239, 68, 68, 0.25), 0 1px 4px rgba(0, 0, 0, 0.25),
-    inset 0 1px 4px rgba(0, 0, 0, 0.15);
-}
-
-.icon-logout-btn.pressed .icon-emoji {
-  transform: scale(0.93);
-}
-
-.icon-logout-btn:hover .icon-emoji {
-  transform: scale(1.25) rotate(12deg);
-  filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0.4));
+  opacity: 1;
 }
 
 .icon-navbar-footer {
-  padding: 4px;
-  text-align: center;
-  margin-top: 1px;
-  display: none;
+  margin-top: 6px;
+  padding: 4px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
 }
 
 .icon-navbar-version {
-  font-size: 9px;
+  font-size: 8px;
+  font-weight: 600;
   color: var(--text-muted);
   opacity: 0.5;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-}
-
-/* Touch Device Responsiveness */
-@media (hover: none) and (pointer: coarse) {
-  .icon-item,
-  .icon-logout-btn {
-    transition: all 0.2s ease;
-  }
-
-  .icon-item:active {
-    transform: scale(0.91);
-    background-color: var(--hover);
-    border-color: var(--accent);
-  }
-
-  .icon-logout-btn:active {
-    transform: scale(0.91);
-  }
-
-  .icon-tooltip {
-    display: none;
-  }
+  letter-spacing: 0.5px;
 }
 
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateX(-20px);
   }
   to {
     opacity: 1;
-    transform: translateX(0);
   }
 }
 
 @keyframes popIn {
   0% {
-    transform: scale(0);
+    transform: scale(0.8);
     opacity: 0;
   }
-  70% {
-    transform: scale(1.15);
+  50% {
+    transform: scale(1.1);
   }
   100% {
     transform: scale(1);
     opacity: 1;
-  }
-}
-
-@media (max-width: 768px) {
-  .icon-navbar {
-    width: 50px;
-    padding: 6px 0;
-    gap: 5px;
-  }
-
-  .icon-item,
-  .icon-logout-btn {
-    width: 42px;
-    height: 42px;
-    border-radius: 9px;
-  }
-
-  .icon-emoji {
-    font-size: 20px;
-  }
-
-  .icon-navbar-title {
-    display: none;
-  }
-
-  .icon-navbar-logo {
-    display: none;
-  }
-
-  .icon-tooltip {
-    font-size: 10px;
-    padding: 4px 6px;
-  }
-}
-
-@media (max-width: 480px) {
-  .icon-navbar {
-    width: 50px;
-    padding: 5px 0;
-    gap: 4px;
-  }
-
-  .icon-item,
-  .icon-logout-btn {
-    width: 40px;
-    height: 40px;
-    border-radius: 8px;
-  }
-
-  .icon-emoji {
-    font-size: 18px;
-  }
-
-  .icon-navbar-header {
-    display: none;
-  }
-
-  .icon-navbar-footer {
-    display: none;
-  }
-
-  .icon-navbar-divider {
-    display: none;
   }
 }

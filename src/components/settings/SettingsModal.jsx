@@ -6,12 +6,15 @@ import FontThemeSelector from "./FontThemeSelector";
 import NotificationsSettings from "./NotificationsSettings";
 import "./SettingsModal.css";
 
-export default function SettingsModal({ onClose }) {
+export default function SettingsModal({ onClose, isNavbarExpanded }) {
   const [activeTab, setActiveTab] = useState("main");
   const { user } = useAuth();
 
   return (
-    <div className="settings-overlay" onClick={onClose}>
+    <div
+      className={`settings-overlay ${isNavbarExpanded ? 'navbar-expanded' : ''}`}
+      onClick={onClose}
+    >
       <div
         className="settings-modal"
         onClick={(e) => e.stopPropagation()}
