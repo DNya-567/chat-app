@@ -14,6 +14,8 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 const path = require("path");
 const swaggerUi = require("swagger-ui-express");
+const helmet = require("helmet");
+const rateLimit = require("express-rate-limit");
 
 /* -------------------- LOCAL MODULES -------------------- */
 const connectDB = require("./db");
@@ -31,6 +33,52 @@ const messagesRoutes = require("./routes/messages");
 /* -------------------- EXPRESS APP -------------------- */
 const app = express();
 
+// Rate limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+  message: 'Too many requests from this IP, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Apply rate limiting to all requests
+app.use(limiter);
+
+// More strict rate limiting for auth routes
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // limit each IP to 5 login attempts per windowMs
+  message: 'Too many authentication attempts, please try again later.',
+});
+
+// Helmet for security headers
+app.use(helmet({
+  crossOriginEmbedderPolicy: false,
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://vercel.live", "https://vitals.vercel-insights.com"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com"],
+      imgSrc: ["'self'", "data:", "https:", "blob:"],
+      connectSrc: ["'self'", "wss:", "https:", "ws:"],
+      frameAncestors: ["'none'"],
+      baseUri: ["'self'"]
+    },
+  },
+}));
+
+// Additional security middleware
+app.use((req, res, next) => {
+  // Force HTTPS in production
+  if (process.env.NODE_ENV === 'production' && req.header('x-forwarded-proto') !== 'https') {
+    return res.redirect(`https://${req.header('host')}${req.url}`);
+  }
+
+  next();
+});
+
 // Allow multiple origins for development and production
 const allowedOrigins = [
   "http://localhost:5173",      // Vite default dev port
@@ -40,6 +88,11 @@ const allowedOrigins = [
   "http://127.0.0.1:5173",      // Localhost alias
   "http://127.0.0.1:5174",      // Localhost alias
 ];
+
+// Add your production URLs here
+if (process.env.NODE_ENV === 'production') {
+  allowedOrigins.push('https://your-app-domain.vercel.app'); // Replace with your actual Vercel domain
+}
 
 app.use(cors({
   origin: function (origin, callback) {
@@ -82,7 +135,7 @@ app.use("/api-docs", swaggerUi.serve);
 app.get("/api-docs", swaggerUi.setup(swaggerSpecs, { explorer: true }));
 
 /* -------------------- API ROUTES -------------------- */
-app.use("/api/auth", authRoutes);
+app.use("/api/auth", authLimiter, authRoutes);
 app.use("/api/chats", chatRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/messages", messagesRoutes);
